@@ -153,7 +153,7 @@ function populate_record($cv_object, $object_type) {
     $field_values = array();
     $tid_field_values = array();
     if($field_info['name'] == 'intern_type') {
-      $cv_object->{$field_info['name']} = explode(';', $cv_object->{$field_info['name']});
+      $field_values = explode(';', $cv_object->{$field_info['name']});
     }
     else {
       $field_values = array($cv_object->{$field_info['name']});
