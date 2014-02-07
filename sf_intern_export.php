@@ -305,7 +305,7 @@ function get_picklist_field_info($reverse = FALSE) {
 // are actually stored in Salesforce, and will need to be updated if something changes in SF.
 function get_picklist_name_by_synonym($synonym) {
   db_set_active('urbmi5');
-  $name = db_result(db_query("SELECT td.name FROM {term_data} td JOIN {term_synonym} ts ON ts.tid = td.tid WHERE ts.name = '%s'", $synonym));
+  $name = db_result(db_query("SELECT td.name FROM um_term_data td JOIN um_term_synonym ts ON ts.tid = td.tid WHERE ts.name = '%s'", $synonym));
   db_set_active('techmi5_socgraph');
   if(empty($name)) {
     $name = $synonym;
@@ -316,7 +316,7 @@ function get_picklist_name_by_synonym($synonym) {
 // Load the correct tid for population into the CV.org record.
 function get_picklist_tid_by_name($name, $vid) {
   db_set_active('urbmi5');
-  $tid = db_result(db_query("SELECT tid FROM {term_data} WHERE name = '%s' AND vid = %d", $name, $vid));
+  $tid = db_result(db_query("SELECT tid FROM um_term_data WHERE name = '%s' AND vid = %d", $name, $vid));
   db_set_active('techmi5_socgraph');
   return $tid;
 }
