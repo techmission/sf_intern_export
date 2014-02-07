@@ -150,18 +150,24 @@ function populate_record($cv_object, $object_type) {
   // Populate the picklist fields by tid.
   $picklist_field_info = get_picklist_field_info();
   foreach($picklist_field_info as $tid_field => $field_info) {
+    $field_values = array();
+    $tid_field_values = array();
     if($field_info['name'] == 'intern_type') {
       $cv_object->{$field_info['name']} = explode(';', $cv_object->{$field_info['name']});
     }
     else {
       $field_values = array($cv_object->{$field_info['name']});
     }
-    foreach($field_values as $key => $field_value) {	
+    foreach($field_values as $key => $field_value) {
       $field_values[$key] = get_picklist_name_by_synonym($field_value);
       $tid_field_values[] = get_picklist_tid_by_name($field_value, $field_info['vid']);
     }
-    $cv_object->{$field_info['name']} = implode(';', $field_values);
-    $cv_object->{$tid_field} = implode(';', $tid_field_values);
+    if(count($field_values) > 0) {
+      $cv_object->{$field_info['name']} = implode(';', $field_values);
+    }
+    if(count($tid_field_values) > 0) {
+      $cv_object->{$tid_field} = implode(';', $tid_field_values);
+    }
   }
   return $cv_object;
 }
