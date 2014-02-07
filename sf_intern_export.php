@@ -88,12 +88,12 @@ function query_sf_objects($sf) {
       $cv_object_records = array();
       foreach($result->records as $key => $sf_object) {
         $cv_object = normalize_record($sf_object, $object_type);
-	    $cv_object = populate_record($cv_object, $object_type);
+        $cv_object = populate_record($cv_object, $object_type);
         $cv_object_records[$cv_object->Id] = $cv_object;
       }
-	  // Free up some memory by unsetting the result array.
+      // Free up some memory by unsetting the result array.
       unset($result);
-	}
+    }
     $query_results += array($object_type => $cv_object_records);
   }
   if(count($sf_object_ids) > 0) {
@@ -105,12 +105,12 @@ function query_sf_objects($sf) {
     catch (Exception $e) {
       salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queries: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
     }
-	if(isset($result_attachments->records)) { 
+    if(isset($result_attachments->records)) { 
       $attachment_records = array();
       foreach($result_attachments->records as $key => $attachment) {
         $attachment_records[$attachment->ParentId] = $attachment;
       }
-	  // Free up some memory by unsetting the result array.
+      // Free up some memory by unsetting the result array.
       unset($result_attachments);
       $query_results['Attachment'] = $attachment_records;
     }
@@ -128,10 +128,10 @@ function normalize_record($sf_object, $object_type) {
   $object_fields = get_object_fields($object_type);
   foreach($object_fields as $cv_fieldname => $sf_fieldname) {
     $sf_object->{$cv_fieldname} = !empty($sf_object->{$sf_fieldname}) ? $sf_object->{$sf_fieldname} : '';
-	// Remove the duplicate fields.
-	if($sf_fieldname != 'Id') {
-	  unset($sf_object->{$sf_fieldname});
-	}
+    // Remove the duplicate fields.
+    if($sf_fieldname != 'Id') {
+      unset($sf_object->{$sf_fieldname});
+    }
   }
   
   return $sf_object;
@@ -152,16 +152,16 @@ function populate_record($cv_object, $object_type) {
   foreach($picklist_field_info as $tid_field => $field_info) {
     if($field_info['name'] == 'intern_type') {
       $cv_object->{$field_info['name']} = explode(';', $cv_object->{$field_info['name']});
-	}
-	else {
+    }
+    else {
       $field_values = array($cv_object->{$field_info['name']});
     }
     foreach($field_values as $key => $field_value) {	
       $field_values[$key] = get_picklist_name_by_synonym($field_value);
       $tid_field_values[] = get_picklist_tid_by_name($field_value, $field_info['vid']);
-	}
-	$cv_object->{$field_info['name'] = implode(';', $field_values);
-	$cv_object->{$tid_field} = implode(';', $tid_field_values);
+    }
+    $cv_object->{$field_info['name'] = implode(';', $field_values);
+    $cv_object->{$tid_field} = implode(';', $tid_field_values);
   }
   return $cv_object;
 }
@@ -176,7 +176,7 @@ function build_soql_query($soql_fields, $object_type) {
   }
   else if($object_type == OBJECT_TYPE_CONTACT) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
-	$soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND LastModifiedDate > " . $last_cron_run_date;
+    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND LastModifiedDate > " . $last_cron_run_date;
   }
   return $soql;
 }
@@ -282,14 +282,14 @@ function get_object_fields($object_type) {
 function get_picklist_field_info($reverse = FALSE) {
   $picklist_field_info = array(
     'source_tids' => array('name' => 'source', 'vid' => SOURCE_VID),
-	'intern_length_tid' => array('name' => 'intern_length', 'vid' => INTERN_LENGTH_VID),
-	'intern_type_tid' => array('name' => 'intern_type', 'vid' => INTERN_TYPE_VID),
-	'citizen_tid' => array('name' => 'citizen', 'vid' => CITIZEN_VID),
-	'pos_pref_tid' => array('name' => 'pos_pref', 'vid' => POS_PREF_VID),
-	'special_skills_tid' => array('name' => 'special_skills', 'vid' => SPECIAL_SKILLS_VID),
-	'work_environ_tid' => array('name' => 'work_environ', 'vid' => WORK_ENVIRON_VID),
-	'work_pop_pref_tid' => array('name' => 'work_pop_pref', 'vid' => WORK_POP_PREF_VID),
-	'cvc_degree_prog_tid' => array('name' => 'cvc_degree_prog', 'vid' => CVC_DEGREE_PROG_VID),
+    'intern_length_tid' => array('name' => 'intern_length', 'vid' => INTERN_LENGTH_VID),
+    'intern_type_tid' => array('name' => 'intern_type', 'vid' => INTERN_TYPE_VID),
+    'citizen_tid' => array('name' => 'citizen', 'vid' => CITIZEN_VID),
+    'pos_pref_tid' => array('name' => 'pos_pref', 'vid' => POS_PREF_VID),
+    'special_skills_tid' => array('name' => 'special_skills', 'vid' => SPECIAL_SKILLS_VID),
+    'work_environ_tid' => array('name' => 'work_environ', 'vid' => WORK_ENVIRON_VID),
+    'work_pop_pref_tid' => array('name' => 'work_pop_pref', 'vid' => WORK_POP_PREF_VID),
+    'cvc_degree_prog_tid' => array('name' => 'cvc_degree_prog', 'vid' => CVC_DEGREE_PROG_VID),
   );
   if($reverse == TRUE) {
     $picklist_field_info = array_keys($picklist_field_info);
