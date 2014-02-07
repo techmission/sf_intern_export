@@ -147,6 +147,10 @@ function populate_record($cv_object, $object_type) {
   // Set the title field.
   $cv_object->title = $cv_object->applic_first_name . ' ' . $cv_object->applic_last_name;
   
+  // Format the birthdate field.
+  $dob = strtotime($cv_object->dob);
+  $cv_object->dob = date('m/j/Y', $dob);
+  
   // Populate the picklist fields by tid.
   $picklist_field_info = get_picklist_field_info();
   foreach($picklist_field_info as $tid_field => $field_info) {
