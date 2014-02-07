@@ -261,6 +261,7 @@ function get_object_fields($object_type) {
     'referer_url' => 'Referer_URL__c'
   );
   if($object_type = OBJECT_TYPE_CONTACT) {
+    $object_fields['top_candidate'] = 'Top_Candidate__c';
     $object_fields['degree_career_goals'] = 'Bachelors_Program_Fits_with__c';
     $object_fields['commitment_length'] = 'Year_Long_Commitment__c';
     $object_fields['applic_loc_street'] = 'MailingStreet';
