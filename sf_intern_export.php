@@ -160,7 +160,7 @@ function populate_record($cv_object, $object_type) {
       $field_values[$key] = get_picklist_name_by_synonym($field_value);
       $tid_field_values[] = get_picklist_tid_by_name($field_value, $field_info['vid']);
     }
-    $cv_object->{$field_info['name'] = implode(';', $field_values);
+    $cv_object->{$field_info['name']} = implode(';', $field_values);
     $cv_object->{$tid_field} = implode(';', $tid_field_values);
   }
   return $cv_object;
@@ -203,7 +203,7 @@ function get_object_fields($object_type) {
     'applic_last_name' => 'LastName',
     'email' => 'Email',
     'phone' => 'Phone',
-    'source' = > 'How_Heard_About_City_Vision__c',
+    'source' => 'How_Heard_About_City_Vision__c',
     'intern_length' => 'Internship_Length__c',
     'intern_type' => 'Internship_Type__c',
     'degree_career_goals' => 'Bachelors_Program_Fits_with_Career_Goals__c',
