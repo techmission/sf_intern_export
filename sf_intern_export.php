@@ -9,7 +9,10 @@
 // Object types.
 define('OBJECT_TYPE_LEAD', 'Lead');
 define('OBJECT_TYPE_CONTACT', 'Contact');
+define('OBJECT_TYPE_CV', 'CVOrg');
 
+// Setting for function get_object_fields().
+define('GET_CV_FIELD_FIELDS', TRUE);
 // Setting for function get_picklist_field_info().
 define('GET_TID_FIELD_NAMES', TRUE);
 
@@ -173,6 +176,16 @@ function populate_record($cv_object, $object_type) {
       $cv_object->{$tid_field} = implode(';', $tid_field_values);
     }
   }
+  
+  //@todo: Set the correct value for cvintern_screened.
+  if($object_type == OBJECT_TYPE_LEAD) {
+    $cv_object->cvintern_screened = 0;
+  }
+  else {
+    $cv_object->cvintern_screened = 1;
+  }
+  
+  $cv_object->cvcintern_applicant = "City Vision Intern Applicant";
   return $cv_object;
 }
 
@@ -192,8 +205,20 @@ function build_soql_query($soql_fields, $object_type) {
 }
 
 // Write the objects queried from Salesforce to the database table.
-function write_cv_objects($objects) {
-  // @todo: Add db code in here.
+function write_cv_objects($cv_objects) {
+  $sql_fields = get_object_fields(OBJECT_TYPE_CV, GET_CV_FIELD_NAMES);
+  $sql_fields = implode(', ', $sql_fields);
+  $placeholders = get_object_fields(OBJECT_TYPE_CV);
+  $placeholders = implode(', ', $placeholders);
+  foreach($cv_objects as $c) {
+    $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
+    $sql .= " ( " . $placeholders . ")";
+    $result = db_query($sql, $c['nid'], $c['vid'], $c['applic_nid'], $c['applic_vid'], $c['source_tids'], 
+	  $c['intern_length_tid'], $c['intern_type_tid'], $c['citizen_tid'], $c['pos_pref_tid'], $c['special_skills_tid'],
+	  $c['work_environ_tid'], $c['work_pop_pref_tid'], $c['cvc_degree_prog_tid'], $c['cvintern_screened'], $c['cvcintern_applicant'],
+	  $c['sfid'], $c['applic_first_name']);
+  }
+  return $result;
 }
 
 // Exports the information on a connection failure.
@@ -206,7 +231,7 @@ function get_object_types() {
   return array(OBJECT_TYPE_LEAD, OBJECT_TYPE_CONTACT);
 }
 
-function get_object_fields($object_type) {
+function get_object_fields($object_type, $reverse = FALSE) {
   $object_fields = array(
     'sfid' => 'Id',
     'applic_first_name' => 'FirstName',
@@ -286,6 +311,90 @@ function get_object_fields($object_type) {
     $object_fields['dob'] = 'Birthdate';
     $object_fields['loc_pref'] = 'CVC_S2_Location_Notes__c';
     $object_fields['start_time'] = 'Preferred_Start_Date_CVC__c';
+  }
+  else if($object_type == OBJECT_TYPE_CV) {
+    $object_fields = array(
+	  'nid' => "'%s'",
+	  'vid' => "'%s'",
+	  'applic_nid' => "'%s'",
+	  'applic_vid' => "'%s'",
+	  'source_tids' => "'%s'",
+	  'intern_length_tid' => '%d',
+	  'intern_type_tid' => '%d',
+	  'citizen_tid' => '%d',
+	  'pos_pref_tid' => '%d',
+	  'special_skills_tid' => '%d',
+	  'work_environ_tid' => '%d',
+	  'work_pop_pref_tid' => '%d',
+	  'cvc_degree_prog_tid' => '%d',
+	  'cvintern_screened' => '%d',
+	  'cvcintern_applicant' => "'%s'",
+	  'sfid' => "'%s'",
+	  'title' => "'%s'",
+      'applic_first_name' => "'%s'",
+      'applic_last_name' => "'%s'",
+      'email' => "'%s'",
+      'phone' => "'%s'",
+      'source' => "'%s'",
+      'intern_length' => "'%s'",
+      'intern_type' => "'%s'",
+      'degree_career_goals' => "'%s'",
+      'is_christian' => "'%s'",
+      'age_requirement' => "'%s'", 
+      'diploma_status' => "'%s'",
+      'citizen' => "'%s'",
+      'commitment_length' => "'%s'",
+      'attending_bachelors' => "'%s'", 
+      'last_active_school' => "'%s'",
+      'gender' => "'%s'", 
+      'applic_loc_street' => "'%s'",
+      'applic_loc_city' => "'%s'", 
+      'applic_loc_province' => "'%s'", 
+      'applic_loc_postal_code' => "'%s'", 
+      'applic_loc_country' => "'%s'", 
+      'testimony' => "'%s'", 
+      'geo_pref' => "'%s'", 
+      'pos_pref' => "'%s'", 
+      'special_skills' => "'%s'",
+      'interest_reason' => "'%s'", 
+      'work_environ' => "'%s'",
+      'work_pop_pref' => "'%s'", 
+      'language' => "'%s'",
+      'attends_church' => "'%s'",
+      'cvc_degree_prog' => "'%s'",
+      'major' => "'%s'",
+      'has_bachelors' => "'%s'",
+      'credits' => "'%s'",
+      'career_goals' => "'%s'",
+      'hrly_commit' => "'%s'",
+      'livable_stipend' => "'%s'",
+      'livable_stiplend_expl' => "'%s'",
+      'crim_record' => "'%s'", 
+      'crim_desc' => "'%s'",
+      'dob' => "'%s'",
+      'housing' => "'%s'",
+      'sites_req' => "'%s'", 
+      'loc_pref' => "'%s'",
+      'start_time' => "'%s'",
+      'forward_resume' => "'%s'",
+      'webcam' => "'%s'",
+      'skype' => "'%s'",
+      'pastoral_ref' => "'%s'",
+      'pastoral_ref_church' => "'%s'",
+      'pastoral_ref_phone' => "'%s'", 
+      'pastoral_ref_email' => "'%s'", 
+      'prof_ref' => "'%s'",
+      'prof_ref_org' => "'%s'", 
+      'prof_ref_phone' => "'%s'", 
+      'prof_ref_email' => "'%s'",
+      'ad_source' => "'%s'",
+      'ad_campaign' => "'%s'", 
+      'ad_keywords' => "'%s'",
+      'referer_url' => "'%s'",
+	);
+  }
+  if($reverse == TRUE) {
+    $object_fields = array_keys($object_fields);
   }
   return $object_fields;
 }
