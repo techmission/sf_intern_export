@@ -215,6 +215,7 @@ function write_cv_objects($cv_objects) {
   $i = 0;
   foreach($object_types as $object_type) {
     foreach($cv_objects as $c) {
+      $i++;
       $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
       $sql .= " ( " . $placeholders . ")";
       /* $result = db_query($sql, $c['nid'], $c['vid'], $c['applic_nid'], $c['applic_vid'], $c['source_tids'], 
@@ -249,7 +250,6 @@ function write_cv_objects($cv_objects) {
         $c['pastoral_ref_phone'], $c['pastoral_ref_email'], $c['prof_ref'], $c['prof_ref_org'], $c['prof_reg_phone'],
         $c['prof_ref_email'], $c['ad_source'], $c['ad_campaign'], $c['ad_keywords'], $c['referer_url']);
       }
-      $i++;
     }
   }
   return $result;
