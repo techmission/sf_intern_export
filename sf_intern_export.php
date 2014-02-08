@@ -233,7 +233,9 @@ function write_cv_objects($cv_objects) {
         $c['start_time'], $c['forward_resume'], $c['webcam'], $c['skype'], $c['pastoral_ref'], $c['pastoral_ref_church'], 
         $c['pastoral_ref_phone'], $c['pastoral_ref_email'], $c['prof_ref'], $c['prof_ref_org'], $c['prof_reg_phone'],
         $c['prof_ref_email'], $c['ad_source'], $c['ad_campaign'], $c['ad_keywords'], $c['referer_url']); */
+      echo "Test";
       if($i < 3) {
+        echo "Test inner loop";
         echo sprintf($sql, $c['sfid'], $c['sfid'], $c['sfid'], $c['sfid'], $c['source_tids'], 
         $c['intern_length_tid'], $c['intern_type_tid'], $c['citizen_tid'], $c['pos_pref_tid'], $c['special_skills_tid'],
         $c['work_environ_tid'], $c['work_pop_pref_tid'], $c['cvc_degree_prog_tid'], $c['cvintern_screened'], $c['cvcintern_applicant'],
