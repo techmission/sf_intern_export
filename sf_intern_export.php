@@ -153,7 +153,7 @@ function populate_record($cv_object, $object_type) {
   
   // Format the birthdate field.
   $dob = strtotime($cv_object->dob);
-  $cv_object->dob = date('m/j/Y', $dob);
+  $cv_object->dob = date('Y-m-d H:i:s', $dob);
   
   // Normalize the applic_loc_country field
   $cv_object->applic_loc_country = get_country_code($cv_object->applic_loc_country);
