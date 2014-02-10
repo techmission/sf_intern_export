@@ -219,21 +219,21 @@ function write_cv_objects($cv_objects) {
       $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
       $sql .= " ( " . $placeholders . ")";
       if($i < 3) {
-      $result = db_query($sql, $c['nid'], $c['vid'], $c['applic_nid'], $c['applic_vid'], $c['source_tids'], 
-        $c['intern_length_tid'], $c['intern_type_tid'], $c['citizen_tid'], $c['pos_pref_tid'], $c['special_skills_tid'],
-        $c['work_environ_tid'], $c['work_pop_pref_tid'], $c['cvc_degree_prog_tid'], $c['cvintern_screened'], $c['cvcintern_applicant'],
-        $c['sfid'], $c['applic_first_name'], $c['applic_last_name'], $c['email'], $c['phone'],
-        $c['source'], $c['intern_length'], $c['intern_type'], $c['degree_career_goals'], $c['is_christian'],
-        $c['age_requirement'], $c['diploma_status'], $c['citizen'], $c['commitment_length'], $c['attending_bachelors'],
-        $c['last_active_school'], $c['gender'], $c['applic_loc_street'], $c['applic_loc_city'], $c['applic_loc_province'],
-        $c['applic_loc_postal_code'], $c['applic_loc_country'], $c['testimony'], $c['geo_pref'],
-        $c['pos_pref'], $c['special_skills'], $c['interest_reason'], $c['work_environ'], $c['work_pop_pref'],
-        $c['language'], $c['attends_church'], $c['cvc_degree_prog'], $c['major'], $c['has_bachelors'],
-        $c['credits'], $c['career_goals'], $c['hrly_commit'], $c['livable_stipend'], $c['livable_stiplend_expl'],
-        $c['crim_record'], $c['crim_desc'], $c['dob'], $c['housing'], $c['sites_req'], $c['loc_pref'],
-        $c['start_time'], $c['forward_resume'], $c['webcam'], $c['skype'], $c['pastoral_ref'], $c['pastoral_ref_church'], 
-        $c['pastoral_ref_phone'], $c['pastoral_ref_email'], $c['prof_ref'], $c['prof_ref_org'], $c['prof_reg_phone'],
-        $c['prof_ref_email'], $c['ad_source'], $c['ad_campaign'], $c['ad_keywords'], $c['referer_url']);
+      $result = db_query($sql, $c->sfid, $c->sfid, $c->sfid, $c->sfid, $c->source_tids, 
+        $c->intern_length_tid, $c->intern_type_tid, $c->citizen_tid, $c->pos_pref_tid, $c->special_skills_tid,
+        $c->work_environ_tid, $c->work_pop_pref_tid, $c->cvc_degree_prog_tid, $c->cvintern_screened, $c->cvcintern_applicant,
+        $c->sfid, $c->applic_first_name, $c->applic_last_name, $c->email, $c->phone,
+        $c->source, $c->intern_length, $c->intern_type, $c->degree_career_goals, $c->is_christian,
+        $c->age_requirement, $c->diploma_status, $c->citizen, $c->commitment_length, $c->attending_bachelors,
+        $c->last_active_school, $c->gender, $c->applic_loc_street, $c->applic_loc_city, $c->applic_loc_province,
+        $c->applic_loc_postal_code, $c->applic_loc_country, $c->testimony, $c->geo_pref,
+        $c->pos_pref, $c->special_skills, $c->interest_reason, $c->work_environ, $c->work_pop_pref,
+        $c->language, $c->attends_church, $c->cvc_degree_prog, $c->major, $c->has_bachelors,
+        $c->credits, $c->career_goals, $c->hrly_commit, $c->livable_stipend, $c->livable_stiplend_expl,
+        $c->crim_record, $c->crim_desc, $c->dob, $c->housing, $c->sites_req, $c->loc_pref,
+        $c->start_time, $c->forward_resume, $c->webcam, $c->skype, $c->pastoral_ref, $c->pastoral_ref_church, 
+        $c->pastoral_ref_phone, $c->pastoral_ref_email, $c->prof_ref, $c->prof_ref_org, $c->prof_reg_phone,
+        $c->prof_ref_email, $c->ad_source, $c->ad_campaign, $c->ad_keywords, $c->referer_url);
       }
     }
   }
