@@ -223,7 +223,7 @@ function write_cv_objects($cv_objects) {
       $result = db_query($sql, $c->sfid, $c->sfid, $c->sfid, $c->sfid, $c->source_tids, 
         $c->intern_length_tid, $c->intern_type_tid, $c->citizen_tid, $c->pos_pref_tid, $c->special_skills_tid,
         $c->work_environ_tid, $c->work_pop_pref_tid, $c->cvc_degree_prog_tid, $c->cvintern_screened, $c->cvcintern_applicant,
-        $c->sfid, $c->applic_first_name, $c->applic_last_name, $c->email, $c->phone,
+        $c->sfid, $c->title, $c->applic_first_name, $c->applic_last_name, $c->email, $c->phone,
         $c->source, $c->intern_length, $c->intern_type, $c->degree_career_goals, $c->is_christian,
         $c->age_requirement, $c->diploma_status, $c->citizen, $c->commitment_length, $c->attending_bachelors,
         $c->last_active_school, $c->gender, $c->applic_loc_street, $c->applic_loc_city, $c->applic_loc_province,
