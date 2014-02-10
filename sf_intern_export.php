@@ -155,6 +155,9 @@ function populate_record($cv_object, $object_type) {
   $dob = strtotime($cv_object->dob);
   $cv_object->dob = date('m/j/Y', $dob);
   
+  // Normalize the applic_loc_country field
+  $cv_object->applic_loc_country = get_country_code($cv_object->applic_loc_country);
+  
   // Populate the picklist fields by tid.
   $picklist_field_info = get_picklist_field_info();
   foreach($picklist_field_info as $tid_field => $field_info) {
@@ -458,6 +461,14 @@ function get_picklist_tid_by_name($name, $vid) {
   $tid = db_result(db_query("SELECT tid FROM um_term_data WHERE name = '%s' AND vid = %d", $name, $vid));
   db_set_active('techmi5_socgraph');
   return $tid;
+}
+
+// Load the ISO 2-character country code by country name.
+function get_country_code($name) {
+  db_set_active('default');
+  $iso_code = db_result(db_query("SELECT country_iso_code_2 FROM {uc_countries} WHERE country_name = '%s'"), $name);
+  db_set_active('techmi5_socgraph');
+  return $iso_code;
 }
 
 // Get the last time the cron was run.
