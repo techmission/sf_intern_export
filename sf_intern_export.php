@@ -214,7 +214,7 @@ function write_cv_objects($cv_objects) {
   $object_types = get_object_types();
   $i = 0;
   foreach($object_types as $object_type) {
-    foreach($cv_objects as $c) {
+    foreach($cv_objects[$object_type] as $c) {
       $i++;
       $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
       $sql .= " ( " . $placeholders . ")";
