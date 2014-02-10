@@ -128,6 +128,7 @@ function normalize_record($sf_object, $object_type) {
     return NULL;
   }
   
+  // Set all the missing fields to have values, with the CV.org fieldnames.
   $object_fields = get_object_fields($object_type);
   foreach($object_fields as $cv_fieldname => $sf_fieldname) {
     $sf_object->{$cv_fieldname} = !empty($sf_object->{$sf_fieldname}) ? $sf_object->{$sf_fieldname} : '';
