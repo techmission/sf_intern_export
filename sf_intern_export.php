@@ -466,7 +466,7 @@ function get_picklist_tid_by_name($name, $vid) {
 // Load the ISO 2-character country code by country name.
 function get_country_code($name) {
   db_set_active('default');
-  $iso_code = db_result(db_query("SELECT country_iso_code_2 FROM {uc_countries} WHERE country_name = '%s'"), $name);
+  $iso_code = db_result(db_query("SELECT country_iso_code_2 FROM uc_countries WHERE country_name = '%s'", $name));
   db_set_active('techmi5_socgraph');
   return $iso_code;
 }
