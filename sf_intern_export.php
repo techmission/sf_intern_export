@@ -5,7 +5,7 @@
  */
  
 /* Includes */
-require_once('sf_intern_export_lib.inc');
+require_once 'sf_intern_export_lib.inc';
 
 /* Main script. */
 
