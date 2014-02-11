@@ -23,5 +23,11 @@ db_set_active('techmi5_socgraph');
 run_tests();
 
 function run_tests() {
-  $field_values[$key] = get_picklist_name_by_synonym($field_value);
-  $tid_field_values[] = get_picklist_tid_by_name($field_value, $field_info['vid']);
+  $picklist_field_info = get_picklist_field_info();
+  foreach($fields as $tid_field_name => $field_info) {
+    foreach($field_values as $field_value) {
+      $field_values[$key] = get_picklist_name_by_synonym($field_value);
+      $tid_field_value = get_picklist_tid_by_name($field_value[$key], $field_info['vid']);
+    }
+  }
+}

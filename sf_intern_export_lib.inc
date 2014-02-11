@@ -134,7 +134,7 @@ function populate_record($cv_object, $object_type) {
     }
     foreach($field_values as $key => $field_value) {
 	  $field_values[$key] = get_picklist_name_by_synonym($field_value);
-      $tid_field_values[] = get_picklist_tid_by_name($field_value, $field_info['vid']);
+      $tid_field_values[] = get_picklist_tid_by_name($field_values[$key], $field_info['vid']);
     }
     if(count($field_values) > 0) {
       $cv_object->{$field_info['name']} = implode(';', $field_values);
