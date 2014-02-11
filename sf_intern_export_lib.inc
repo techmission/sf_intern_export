@@ -434,10 +434,13 @@ function get_country_code($name) {
 
 // Get the last time the cron was run.
 // @todo Return the date from the table, 
-// or a date 3 years in the past if the table is empty.
+// or a date 3 months in the past if the table is empty.
 function get_last_cron_run_date() {
-  // Currently just have this be the present minus 3 years.
-  $last_cron_run_date = time() - (60 * 60 * 24 * 365 * 3);
+  // Currently just have this be the present minus 3 months.
+  $is_empty = TRUE;
+  if($is_empty == TRUE) {
+    $last_cron_run_date = time() - (60 * 60 * 24 * 90);
+  }
   return gmdate(DATE_ATOM, $last_cron_run_date);
 }
 
