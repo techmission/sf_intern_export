@@ -64,7 +64,7 @@ function query_sf_objects($sf) {
   }
   if(count($sf_object_ids) > 0) {
     $sf_object_ids_text = implode_quoted($sf_object_ids);
-    $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
+    $soql = "SELECT Id, ParentId, Name FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
     try {
       $result_attachments = $sf->client->query($soql);
     }

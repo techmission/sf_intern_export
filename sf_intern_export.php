@@ -33,7 +33,7 @@ function run_cron() {
   }
   
   $cv_objects = query_sf_objects($sf);
-  //print_r($cv_objects);
+  print_r($cv_objects['Attachment']);
   
   if((isset($cv_objects[OBJECT_TYPE_LEAD]) && count($cv_objects[OBJECT_TYPE_LEAD]) > 0) || (isset($cv_objects[OBJECT_TYPE_CONTACT]) && count($cv_objects[OBJECT_TYPE_CONTACT]) > 0)) {
     $result = write_cv_objects($cv_objects);
