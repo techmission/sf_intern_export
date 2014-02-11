@@ -170,15 +170,8 @@ function populate_record($cv_object, $object_type) {
       $field_values = array($cv_object->{$field_info['name']});
     }
     foreach($field_values as $key => $field_value) {
-	  $fields_with_issues = array('intern_length', 'citizen', 'intern_type', 'work_environ', 'work_pop_pref', 'cvc_degree_prog');
 	  $field_values[$key] = get_picklist_name_by_synonym($field_value);
-	  if(in_array($key, $fields_with_issues)) {
-	    echo "<p>" . $field_values[$key] . "</p>";
-	  }
       $tid_field_values[] = get_picklist_tid_by_name($field_value, $field_info['vid']);
-	  if(in_array($key, $fields_with_issues)) {
-	    echo "<p>" . get_picklist_tid_by_name($field_value, $field_info['vid']) . "</p>";
-	  }
     }
     if(count($field_values) > 0) {
       $cv_object->{$field_info['name']} = implode(';', $field_values);
