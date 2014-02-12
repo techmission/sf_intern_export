@@ -137,6 +137,7 @@ function write_attachment_to_file($attachment) {
     return NULL;
   }
   // Decode the text of the file.
+  echo $attachment->Body;
   $body = base64_decode($attachment->Body);
   echo $body;
   // Write the file to the filesystem.
