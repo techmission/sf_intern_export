@@ -23,6 +23,9 @@ define('WORK_ENVIRON_VID', 367);
 define('WORK_POP_PREF_VID', 368);
 define('CVC_DEGREE_PROG_VID', 369);
 
+// Directory for storing attachment files.
+define('ATTACHMENT_DIRECTORY', '/home/chrisvol/files/resumes/');
+
 /* Workhorse functions */
 
 // Queries for the Salesforce intern leads to be imported
@@ -89,7 +92,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   // Implode & quote the array of Ids for use in SOQL statement.
   $sf_object_ids_text = implode_quoted($sf_object_ids);
   // Query for the attachments.
-  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 3"; 
+  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 10"; 
   try {
     $result_attachments = $sf->client->query($soql);
   }
@@ -100,6 +103,8 @@ function query_sf_attachments($sf, $sf_object_ids) {
   if($result_attachments->size > 0) {
 	while($queried_all == FALSE) {
 	  foreach($result_attachments->records as $key => $attachment) {
+	    $result = write_attachment_to_file($attachment);
+	    unset($attachment->Body);
         $attachment_records[$attachment->ParentId] = $attachment;
       }
 	  if($result_attachments->done != TRUE) {
@@ -118,6 +123,23 @@ function query_sf_attachments($sf, $sf_object_ids) {
   return $attachment_records;
 }
 
+function write_attachment_to_file($attachment) {
+  // Check for required properties.
+  if(!is_object($attachment) || empty($attachment->ParentId) || empty($attachment->Name) || empty($attachment->Body)) {
+    return NULL;
+  }
+  $base_filename = pathinfo($attachment->Name, PATHINFO_BASENAME);
+  $ext = pathinfo($attachment->Name, PATHINFO_EXTENSION);
+  // Check if the file extension is allowed.
+  if(!file_extension_is_allowed($ext)) {
+    return NULL;
+  }
+  $body = base64_decode($attachment->Body);
+  $filename = ATTACHMENT_DIRECTORY . '/' . $base_filename . '=' . $attachment->Id . '.' . $ext;
+  $result = file_put_contents($filename, $body);
+  return $result;
+}
+  
 // Normalize a lead record to have all the fields.
 function normalize_record($sf_object, $object_type) {
   // Exit early if the "bare minimum" of fields is not present.
@@ -483,6 +505,16 @@ function get_last_cron_run_date() {
     $last_cron_run_date = time() - (60 * 60 * 24 * 90);
   }
   return gmdate(DATE_ATOM, $last_cron_run_date);
+}
+
+// Check if the file extension is allowed.
+function file_extension_is_allowed($ext) {
+  $is_allowed = FALSE;
+  $allowed_exts = array('txt', 'doc', 'docx', 'rtf', 'htm', 'html', 'pdf', 'odt', 'wpd');
+  if(in_array($ext, $allowed_exts)) {
+    $is_allowed = TRUE;
+  }
+  return TRUE;
 }
 
 // Implodes the array with quotes around it.
