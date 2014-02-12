@@ -20,20 +20,24 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 db_set_active('techmi5_socgraph');
 
 // Execute the intern sync cron.
-run_cron();
+$success = run_cron();
 
 /* Main cron function */
 function run_cron() {
+  $result = FALSE;
   $sf = salesforce_api_connect();
 
   if(!is_object($sf)) {
-    exit_connection_failed();
+    $result = exit_connection_failed();
   }
   
   $cv_objects = query_sf_objects($sf);
-  //print_r($cv_objects['Attachment']);
   
   if((isset($cv_objects[OBJECT_TYPE_LEAD]) && count($cv_objects[OBJECT_TYPE_LEAD]) > 0) || (isset($cv_objects[OBJECT_TYPE_CONTACT]) && count($cv_objects[OBJECT_TYPE_CONTACT]) > 0)) {
-    //$result = write_cv_objects($cv_objects);
+    $results = write_cv_objects($cv_objects);
   }
+  
+  $result = write_export_results($results);
+  
+  return $result;
 }

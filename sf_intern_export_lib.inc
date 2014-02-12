@@ -103,9 +103,11 @@ function query_sf_attachments($sf, $sf_object_ids) {
   if($result_attachments->size > 0) {
 	while($queried_all == FALSE) {
 	  foreach($result_attachments->records as $key => $attachment) {
-	    $result = write_attachment_to_file($attachment);
-	    unset($attachment->Body);
-        $attachment_records[$attachment->ParentId] = $attachment;
+	    $attachment_filename = write_attachment_to_file($attachment);
+		unset($attachment);
+		if(!empty($attachment_filename)) {
+          $attachment_records[$attachment->ParentId] = $attachment_filename;
+		}
       }
 	  if($result_attachments->done != TRUE) {
 	    try {
@@ -141,7 +143,12 @@ function write_attachment_to_file($attachment) {
   $result = file_put_contents($filename, $attachment->Body);
   echo '<p>Wrote ' . $result . ' bytes to ' . $filename . '</p>';
   // @todo: Add db logging here.
-  return $result;
+  if($result > 0) {
+    return $filename;
+  }
+  else {
+    return NULL;
+  }
 }
   
 // Normalize a lead record to have all the fields.
