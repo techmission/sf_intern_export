@@ -64,7 +64,7 @@ function query_sf_objects($sf) {
   }
   // Fetch the attachments linked to the Leads & Contacts.
   if(count($sf_object_ids) > 0) {
-    $attachment_records = query_sf_attachments($sf_object_ids);
+    $attachment_records = query_sf_attachments($sf, $sf_object_ids);
 	if(count($attachment_records) > 0) {
 	  $query_results['Attachment'] = $attachment_records;
 	}
@@ -72,9 +72,13 @@ function query_sf_objects($sf) {
   return $query_results;
 }
 
-function query_sf_attachments($sf_object_ids) {
+function query_sf_attachments($sf, $sf_object_ids) {
   $attachment_records = array();
   $queried_all = FALSE;
+  // Function requires an active Salesforce connection.
+  if(!is_object($sf)) {
+    return NULL;
+  }  
   // If no ParentIds, return the empty array.
   if(!is_array($sf_object_ids) || count($sf_object_ids) < 1) {
 	return $attachment_records;
