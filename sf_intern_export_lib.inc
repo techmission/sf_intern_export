@@ -128,13 +128,16 @@ function write_attachment_to_file($attachment) {
   if(!is_object($attachment) || empty($attachment->ParentId) || empty($attachment->Name) || empty($attachment->Body)) {
     return NULL;
   }
+  // Get the filename parts.
   $base_filename = pathinfo($attachment->Name, PATHINFO_BASENAME);
   $ext = pathinfo($attachment->Name, PATHINFO_EXTENSION);
   // Check if the file extension is allowed.
   if(!file_extension_is_allowed($ext)) {
     return NULL;
   }
+  // Decode the text of the file.
   $body = base64_decode($attachment->Body);
+  // Write the file to the filesystem.
   $filename = ATTACHMENT_DIRECTORY . '/' . $base_filename . '=' . $attachment->Id . '.' . $ext;
   $result = file_put_contents($filename, $body);
   echo 'Wrote ' $result . ' bytes to ' . $filename;
