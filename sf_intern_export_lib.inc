@@ -24,7 +24,7 @@ define('WORK_POP_PREF_VID', 368);
 define('CVC_DEGREE_PROG_VID', 369);
 
 // Directory for storing attachment files.
-define('ATTACHMENT_DIRECTORY', '/home/chrisvol/files/resumes/');
+define('ATTACHMENT_DIRECTORY', '/home/chrisvol/files/resumes');
 
 /* Workhorse functions */
 
