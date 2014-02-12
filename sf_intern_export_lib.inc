@@ -555,7 +555,7 @@ function get_last_cron_run_id() {
   $sql = 'SELECT MAX(cron_id) FROM tbl_sf_intern_export_cron';
   $result = db_result(db_query($sql));
   if($result != FALSE) {
-    $last_cron_run_id = $result;
+    $last_cron_run_id = $result++;
   }
   return $last_cron_run_id;
 }
