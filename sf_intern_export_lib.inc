@@ -137,7 +137,7 @@ function write_attachment_to_file($attachment) {
     return NULL;
   }
   // Write the file to the filesystem.
-  $filename = ATTACHMENT_DIRECTORY . '/' . $base_filename . '=' . $attachment->Id . '.' . $ext;
+  $filename = ATTACHMENT_DIRECTORY . '/SFID=' .  $attachment->Id . '_Filename=' . $base_filename . '.' . $ext;
   //header('Content-Type: application/force-download');
   //header('Content-Disposition: inline; filename="' . $filename . '"');
   $result = file_put_contents($filename, $attachment->Body);
