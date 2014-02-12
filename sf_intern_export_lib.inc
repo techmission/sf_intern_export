@@ -92,7 +92,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   // Implode & quote the array of Ids for use in SOQL statement.
   $sf_object_ids_text = implode_quoted($sf_object_ids);
   // Query for the attachments.
-  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 1"; 
+  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 50"; 
   try {
     $result_attachments = $sf->client->query($soql);
   }
@@ -138,10 +138,8 @@ function write_attachment_to_file($attachment) {
   }
   // Write the file to the filesystem.
   $filename = ATTACHMENT_DIRECTORY . '/SFID=' .  $attachment->Id . '_Filename=' . $base_filename . '.' . $ext;
-  //header('Content-Type: application/force-download');
-  //header('Content-Disposition: inline; filename="' . $filename . '"');
   $result = file_put_contents($filename, $attachment->Body);
-  echo 'Wrote ' . $result . ' bytes to ' . $filename;
+  echo '<p>Wrote ' . $result . ' bytes to ' . $filename . '</p>';
   // @todo: Add db logging here.
   return $result;
 }
