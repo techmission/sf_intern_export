@@ -22,9 +22,7 @@ db_set_active('techmi5_socgraph');
 // Execute the intern sync cron.
 run_cron();
 
-/* Function definitions. */
-
-// Main cron function
+/* Main cron function */
 function run_cron() {
   $sf = salesforce_api_connect();
 

@@ -23,6 +23,8 @@ define('WORK_ENVIRON_VID', 367);
 define('WORK_POP_PREF_VID', 368);
 define('CVC_DEGREE_PROG_VID', 369);
 
+/* Workhorse functions */
+
 // Queries for the Salesforce intern leads to be imported
 function query_sf_objects($sf) {
   // Function requires an active Salesforce connection.
@@ -72,6 +74,7 @@ function query_sf_objects($sf) {
   return $query_results;
 }
 
+// Query for the Salesforce attachments
 function query_sf_attachments($sf, $sf_object_ids) {
   $attachment_records = array();
   $queried_all = FALSE;
@@ -242,10 +245,13 @@ function exit_connection_failed() {
 }
 
 /* Functions that define data structures. */
+
+// Get the types of Salesforce objects for which to query.
 function get_object_types() {
   return array(OBJECT_TYPE_LEAD, OBJECT_TYPE_CONTACT);
 }
 
+// Get the fields of the Salesforce object for leads and contacts.
 function get_sf_object_fields($object_type) {
   $object_fields = array(
     'sfid' => 'Id',
@@ -330,6 +336,7 @@ function get_sf_object_fields($object_type) {
   return $object_fields;
 }
 
+// Get the fields to write to in the social graph database, and their placeholder type.
 function get_cv_object_fields($reverse = FALSE) {
   $object_fields = array(
     'nid' => "'%s'",
@@ -416,6 +423,7 @@ function get_cv_object_fields($reverse = FALSE) {
   return $object_fields;
 }
 
+// Get information about the picklist fields.
 function get_picklist_field_info($reverse = FALSE) {
   $picklist_field_info = array(
     'source_tids' => array('name' => 'source', 'vid' => SOURCE_VID),
