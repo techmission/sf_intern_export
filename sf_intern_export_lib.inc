@@ -62,26 +62,53 @@ function query_sf_objects($sf) {
     }
     $query_results += array($object_type => $cv_object_records);
   }
+  // Fetch the attachments linked to the Leads & Contacts.
   if(count($sf_object_ids) > 0) {
-    $sf_object_ids_text = implode_quoted($sf_object_ids);
-    $soql = "SELECT Id, ParentId, Name FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
-    try {
-      $result_attachments = $sf->client->query($soql);
-    }
-    catch (Exception $e) {
-      salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queries: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
-    }
-    if(isset($result_attachments->records)) { 
-      $attachment_records = array();
-      foreach($result_attachments->records as $key => $attachment) {
-        $attachment_records[$attachment->ParentId] = $attachment;
-      }
-      // Free up some memory by unsetting the result array.
-      unset($result_attachments);
-      $query_results['Attachment'] = $attachment_records;
-    }
+    $attachment_records = query_sf_attachments($sf_object_ids);
+	if(count($attachment_records) > 0) {
+	  $query_results['Attachment'] = $attachment_records;
+	}
   }
   return $query_results;
+}
+
+function query_sf_attachments($sf_object_ids) {
+  $attachment_records = array();
+  $queried_all = FALSE;
+  // If no ParentIds, return the empty array.
+  if(!is_array($sf_object_ids) || count($sf_object_ids) < 1) {
+	return $attachment_records;
+  }
+  // Implode & quote the array of Ids for use in SOQL statement.
+  $sf_object_ids_text = implode_quoted($sf_object_ids);
+  // Query for the attachments.
+  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
+  try {
+    $result_attachments = $sf->client->query($soql);
+  }
+  catch (Exception $e) {
+    salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queries: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
+  }
+  // Use queryMore to get the rest of the attachments.
+  if($result_attachments->size > 0)) {
+	while($queried_all == FALSE) {
+	  foreach($result_attachments->records as $key => $attachment) {
+        $attachment_records[$attachment->ParentId] = $attachment;
+      }
+	  if($result_attachments->done != TRUE) {
+	    try {
+		  $result_attachments = $sf->client->queryMore($result_attachments->queryLocator);
+		}
+		catch (Exception $e) {
+		  salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queryMore: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
+		}
+	  }
+	  else {
+		$queried_all = TRUE;
+	  }
+	} 
+  }
+  return $attachment_records;
 }
 
 // Normalize a lead record to have all the fields.
