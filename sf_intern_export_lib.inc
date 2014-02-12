@@ -518,7 +518,7 @@ function file_extension_is_allowed($ext) {
   if(in_array($ext, $allowed_exts)) {
     $is_allowed = TRUE;
   }
-  return TRUE;
+  return $is_allowed;
 }
 
 // Implodes the array with quotes around it.
