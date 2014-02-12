@@ -97,7 +97,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   // Implode & quote the array of Ids for use in SOQL statement.
   $sf_object_ids_text = implode_quoted($sf_object_ids);
   // Query for the attachments.
-  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 10"; 
+  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
   try {
     $result_attachments = $sf->client->query($soql);
   }
@@ -305,9 +305,9 @@ function write_export_results($results) {
 	attachment_attempts, attachment_successes, attachment_failures) VALUES
 	(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)";
   $result = db_query($sql, $last_cron_run_id, time(), CONNECTION_SUCCESS, 
-    $results[OBJECT_TYPE_LEAD]['attempts'], $results[OBJECT_TYPE_LEAD]['successes'], $results[OBJECT_TYPE_LEAD]['failures'],
-	$results[OBJECT_TYPE_CONTACT]['attempts'], $results[OBJECT_TYPE_CONTACT]['successes'], $results[OBJECT_TYPE_CONTACT]['failures'],
-	$results[OBJECT_TYPE_ATTACHMENT]['attempts'], $results[OBJECT_TYPE_ATTACHMENT]['successes'], $results[OBJECT_TYPE_ATTACHMENT]['failures']);
+    $results['attempts'][OBJECT_TYPE_LEAD], $results['successes'][OBJECT_TYPE_LEAD], $results['failures'][OBJECT_TYPE_LEAD],
+	$results['attempts'][OBJECT_TYPE_CONTACT], $results['successes'][OBJECT_TYPE_CONTACT], $results['failures'][OBJECT_TYPE_CONTACT],
+	$results['attempts'][OBJECT_TYPE_ATTACHMENT], $results['successes'][OBJECT_TYPE_ATTACHMENT], $results['failures'][OBJECT_TYPE_ATTACHMENT]);
   return $result;
 }
 
