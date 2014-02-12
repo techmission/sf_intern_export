@@ -140,7 +140,7 @@ function write_attachment_to_file($attachment) {
   // Write the file to the filesystem.
   $filename = ATTACHMENT_DIRECTORY . '/' . $base_filename . '=' . $attachment->Id . '.' . $ext;
   $result = file_put_contents($filename, $body);
-  echo 'Wrote ' $result . ' bytes to ' . $filename;
+  echo 'Wrote ' . $result . ' bytes to ' . $filename;
   // @todo: Add db logging here.
   return $result;
 }
