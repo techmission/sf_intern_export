@@ -5,6 +5,7 @@
 // Object types.
 define('OBJECT_TYPE_LEAD', 'Lead');
 define('OBJECT_TYPE_CONTACT', 'Contact');
+define('OBJECT_TYPE_ATTACHMENT', 'Attachment');
 define('OBJECT_TYPE_CV', 'CVOrg');
 
 // Setting for function get_cv_object_fields().
@@ -25,6 +26,10 @@ define('CVC_DEGREE_PROG_VID', 369);
 
 // Directory for storing attachment files.
 define('ATTACHMENT_DIRECTORY', '/home/chrisvol/files/resumes');
+
+// SF connection failed.
+define('CONNECTION_FAILED', 0);
+define('CONNECTION_SUCCESS', 1);
 
 /* Workhorse functions */
 
@@ -71,7 +76,7 @@ function query_sf_objects($sf) {
   if(count($sf_object_ids) > 0) {
     $attachment_records = query_sf_attachments($sf, $sf_object_ids);
 	if(count($attachment_records) > 0) {
-	  $query_results['Attachment'] = $attachment_records;
+	  $query_results[OBJECT_TYPE_ATTACHMENT] = $attachment_records;
 	}
   }
   return $query_results;
@@ -92,7 +97,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   // Implode & quote the array of Ids for use in SOQL statement.
   $sf_object_ids_text = implode_quoted($sf_object_ids);
   // Query for the attachments.
-  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 50"; 
+  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 10"; 
   try {
     $result_attachments = $sf->client->query($soql);
   }
@@ -141,7 +146,6 @@ function write_attachment_to_file($attachment) {
   // Write the file to the filesystem.
   $filename = ATTACHMENT_DIRECTORY . '/SFID=' .  $attachment->Id . '_Filename=' . $base_filename . '.' . $ext;
   $result = file_put_contents($filename, $attachment->Body);
-  echo '<p>Wrote ' . $result . ' bytes to ' . $filename . '</p>';
   // @todo: Add db logging here.
   if($result > 0) {
     return $filename;
@@ -240,16 +244,17 @@ function build_soql_query($soql_fields, $object_type) {
 
 // Write the objects queried from Salesforce to the database table.
 function write_cv_objects($cv_objects) {
+  $results = array('attempts' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0),
+                   'successes' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0),
+				   'failures' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0));
   $sql_fields = get_cv_object_fields(GET_CV_FIELD_NAMES);
   $sql_fields = implode(', ', $sql_fields);
   $placeholders = get_cv_object_fields();
   $placeholders = implode(', ', $placeholders);
   
   $object_types = get_object_types();
-  $i = 0;
   foreach($object_types as $object_type) {
     foreach($cv_objects[$object_type] as $c) {
-      $i++;
       $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
       $sql .= " ( " . $placeholders . ")";
       $result = db_query($sql, $c->sfid, $c->sfid, $c->sfid, $c->sfid, $c->source_tids, 
@@ -267,14 +272,51 @@ function write_cv_objects($cv_objects) {
         $c->start_time, $c->forward_resume, $c->webcam, $c->skype, $c->pastoral_ref, $c->pastoral_ref_church, 
         $c->pastoral_ref_phone, $c->pastoral_ref_email, $c->prof_ref, $c->prof_ref_org, $c->prof_reg_phone,
         $c->prof_ref_email, $c->ad_source, $c->ad_campaign, $c->ad_keywords, $c->referer_url);
+	  if($result != FALSE) {
+	    $results['successes'][$object_type]++;
+	  }
+	  else {
+	    $results['failures'][$object_type]++;
+	  }
     }
   }
+  if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
+    $results['attempts'][OBJECT_TYPE_ATTACHMENT] = count($cv_objects[OBJECT_TYPE_ATTACHMENT]);
+    foreach($cv_objects[OBJECT_TYPE_ATTACHMENT] as $parent_sfid => $filename) {
+      $sql = 'UPDATE tbl_applic_resume_joined SET res_file = "%s" WHERE sfid = "%s"';
+	  $result = db_query($sql, $filename, $parent_sfid);
+	  if($result != FALSE) {
+	    $results['successes'][OBJECT_TYPE_ATTACHMENT]++;
+	  }
+	  else {
+	    $results['failures'][OBJECT_TYPE_ATTACHMENT]++;
+	  }
+    }
+  }	
+  return $results;
+}
+
+// Log the results of the export from SF to CV
+function write_export_results($results) {
+  $last_cron_run_id = get_last_cron_run_id();
+  $sql = "INSERT INTO tbl_sf_intern_export_cron (cron_id, run_date, success, 
+    lead_attempts, lead_successes, lead_failures, 
+	contact_attempts, contact_successes, contact_failures,
+	attachment_attempts, attachment_successes, attachment_failures) VALUES
+	(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)";
+  $result = db_query($sql, $last_cron_run_id, time(), CONNECTION_SUCCESS, 
+    $results[OBJECT_TYPE_LEAD]['attempts'], $results[OBJECT_TYPE_LEAD]['successes'], $results[OBJECT_TYPE_LEAD]['failures'],
+	$results[OBJECT_TYPE_CONTACT]['attempts'], $results[OBJECT_TYPE_CONTACT]['successes'], $results[OBJECT_TYPE_CONTACT]['failures'],
+	$results[OBJECT_TYPE_ATTACHMENT]['attempts'], $results[OBJECT_TYPE_ATTACHMENT]['successes'], $results[OBJECT_TYPE_ATTACHMENT]['failures']);
   return $result;
 }
 
-// Exports the information on a connection failure.
+// Writes to the cron log table information on a connection failure.
 function exit_connection_failed() {
-  // @todo: Put code in here to write to the database table that logs the cron runs
+  $last_cron_run_id = get_last_cron_run_id();
+  $sql = "INSERT INTO tbl_sf_intern_export_cron (cron_id, run_date, success) VALUES (%d, %d, %d)";
+  $result = db_query($sql, $last_cron_run_id, time(), CONNECTION_FAILED);
+  return $result;
 }
 
 /* Functions that define data structures. */
@@ -506,14 +548,29 @@ function get_country_code($name) {
   return $iso_code;
 }
 
+// Get last cron run id.
+function get_last_cron_run_id() {
+  // Default to 1 for cron run id.
+  $last_cron_run_id = 1;
+  $sql = 'SELECT MAX(cron_id) FROM tbl_sf_intern_export_cron';
+  $result = db_result(db_query($sql));
+  if($result != FALSE) {
+    $last_cron_run_id = $result;
+  }
+  return $last_cron_run_id;
+}
+
 // Get the last time the cron was run.
-// @todo Return the date from the table, 
+// Returns the date from the table, 
 // or a date 3 months in the past if the table is empty.
 function get_last_cron_run_date() {
-  // Currently just have this be the present minus 3 months.
-  $is_empty = TRUE;
-  if($is_empty == TRUE) {
-    $last_cron_run_date = time() - (60 * 60 * 24 * 90);
+  // Default to the present minus 3 months.
+  $last_cron_run_date = time() - (60 * 60 * 24 * 90);
+  $sql = 'SELECT run_date FROM tbl_sf_intern_export_cron WHERE cron_id = MAX(cron_id)';
+  $result = db_result(db_query($sql));
+  // Set to  if the table couldn't be read or was empty.
+  if($result != FALSE) {
+    $last_cron_run_date = $result;
   }
   return gmdate(DATE_ATOM, $last_cron_run_date);
 }
