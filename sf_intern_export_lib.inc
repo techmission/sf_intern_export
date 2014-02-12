@@ -7,7 +7,7 @@ define('OBJECT_TYPE_LEAD', 'Lead');
 define('OBJECT_TYPE_CONTACT', 'Contact');
 define('OBJECT_TYPE_CV', 'CVOrg');
 
-// Setting for function get_object_fields().
+// Setting for function get_cv_object_fields().
 define('GET_CV_FIELD_FIELDS', TRUE);
 // Setting for function get_picklist_field_info().
 define('GET_TID_FIELD_NAMES', TRUE);
@@ -34,7 +34,7 @@ function query_sf_objects($sf) {
   $object_types = get_object_types();
   
   foreach($object_types as $object_type) {
-    $object_fields = get_object_fields($object_type);
+    $object_fields = get_sf_object_fields($object_type);
     $soql_fields = implode(", ", $object_fields);
 
     $soql = build_soql_query($soql_fields, $object_type); 	
@@ -90,7 +90,7 @@ function query_sf_attachments($sf_object_ids) {
     salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queries: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
   }
   // Use queryMore to get the rest of the attachments.
-  if($result_attachments->size > 0)) {
+  if($result_attachments->size > 0) {
 	while($queried_all == FALSE) {
 	  foreach($result_attachments->records as $key => $attachment) {
         $attachment_records[$attachment->ParentId] = $attachment;
@@ -119,7 +119,7 @@ function normalize_record($sf_object, $object_type) {
   }
   
   // Set all the missing fields to have values, with the CV.org fieldnames.
-  $object_fields = get_object_fields($object_type);
+  $object_fields = get_cv_object_fields();
   foreach($object_fields as $cv_fieldname => $sf_fieldname) {
     $sf_object->{$cv_fieldname} = !empty($sf_object->{$sf_fieldname}) ? $sf_object->{$sf_fieldname} : '';
     // Remove the duplicate fields.
@@ -200,9 +200,9 @@ function build_soql_query($soql_fields, $object_type) {
 
 // Write the objects queried from Salesforce to the database table.
 function write_cv_objects($cv_objects) {
-  $sql_fields = get_object_fields(OBJECT_TYPE_CV, GET_CV_FIELD_NAMES);
+  $sql_fields = get_cv_object_fields(GET_CV_FIELD_NAMES);
   $sql_fields = implode(', ', $sql_fields);
-  $placeholders = get_object_fields(OBJECT_TYPE_CV);
+  $placeholders = get_cv_object_fields();
   $placeholders = implode(', ', $placeholders);
   
   $object_types = get_object_types();
@@ -242,7 +242,7 @@ function get_object_types() {
   return array(OBJECT_TYPE_LEAD, OBJECT_TYPE_CONTACT);
 }
 
-function get_object_fields($object_type, $reverse = FALSE) {
+function get_sf_object_fields($object_type) {
   $object_fields = array(
     'sfid' => 'Id',
     'applic_first_name' => 'FirstName',
@@ -323,87 +323,89 @@ function get_object_fields($object_type, $reverse = FALSE) {
     $object_fields['loc_pref'] = 'CVC_S2_Location_Notes__c';
     $object_fields['start_time'] = 'Preferred_Start_Date_CVC__c';
   }
-  else if($object_type == OBJECT_TYPE_CV) {
-    $object_fields = array(
-      'nid' => "'%s'",
-      'vid' => "'%s'",
-      'applic_nid' => "'%s'",
-      'applic_vid' => "'%s'",
-      'source_tids' => "'%s'",
-      'intern_length_tid' => '%d',
-      'intern_type_tid' => '%d',
-      'citizen_tid' => '%d',
-      'pos_pref_tid' => '%d',
-      'special_skills_tid' => '%d',
-      'work_environ_tid' => '%d',
-      'work_pop_pref_tid' => '%d',
-      'cvc_degree_prog_tid' => '%d',
-      'cvintern_screened' => '%d',
-      'cvcintern_applicant' => "'%s'",
-      'sfid' => "'%s'",
-      'title' => "'%s'",
-      'applic_first_name' => "'%s'",
-      'applic_last_name' => "'%s'",
-      'email' => "'%s'",
-      'phone' => "'%s'",
-      'source' => "'%s'",
-      'intern_length' => "'%s'",
-      'intern_type' => "'%s'",
-      'degree_career_goals' => "'%s'",
-      'is_christian' => "'%s'",
-      'age_requirement' => "'%s'", 
-      'diploma_status' => "'%s'",
-      'citizen' => "'%s'",
-      'commitment_length' => "'%s'",
-      'attending_bachelors' => "'%s'", 
-      'last_active_school' => "'%s'",
-      'gender' => "'%s'", 
-      'applic_loc_street' => "'%s'",
-      'applic_loc_city' => "'%s'", 
-      'applic_loc_province' => "'%s'", 
-      'applic_loc_postal_code' => "'%s'", 
-      'applic_loc_country' => "'%s'", 
-      'testimony' => "'%s'", 
-      'geo_pref' => "'%s'", 
-      'pos_pref' => "'%s'", 
-      'special_skills' => "'%s'",
-      'interest_reason' => "'%s'", 
-      'work_environ' => "'%s'",
-      'work_pop_pref' => "'%s'", 
-      'language' => "'%s'",
-      'attends_church' => "'%s'",
-      'cvc_degree_prog' => "'%s'",
-      'major' => "'%s'",
-      'has_bachelors' => "'%s'",
-      'credits' => "'%s'",
-      'career_goals' => "'%s'",
-      'hrly_commit' => "'%s'",
-      'livable_stipend' => "'%s'",
-      'livable_stiplend_expl' => "'%s'",
-      'crim_record' => "'%s'", 
-      'crim_desc' => "'%s'",
-      'dob' => "'%s'",
-      'housing' => "'%s'",
-      'sites_req' => "'%s'", 
-      'loc_pref' => "'%s'",
-      'start_time' => "'%s'",
-      'forward_resume' => "'%s'",
-      'webcam' => "'%s'",
-      'skype' => "'%s'",
-      'pastoral_ref' => "'%s'",
-      'pastoral_ref_church' => "'%s'",
-      'pastoral_ref_phone' => "'%s'", 
-      'pastoral_ref_email' => "'%s'", 
-      'prof_ref' => "'%s'",
-      'prof_ref_org' => "'%s'", 
-      'prof_ref_phone' => "'%s'", 
-      'prof_ref_email' => "'%s'",
-      'ad_source' => "'%s'",
-      'ad_campaign' => "'%s'", 
-      'ad_keywords' => "'%s'",
-      'referer_url' => "'%s'",
-	  );
-  }
+  return $object_fields;
+}
+
+function get_cv_object_fields($reverse = FALSE) {
+  $object_fields = array(
+    'nid' => "'%s'",
+    'vid' => "'%s'",
+    'applic_nid' => "'%s'",
+    'applic_vid' => "'%s'",
+    'source_tids' => "'%s'",
+    'intern_length_tid' => '%d',
+    'intern_type_tid' => '%d',
+    'citizen_tid' => '%d',
+    'pos_pref_tid' => '%d',
+    'special_skills_tid' => '%d',
+    'work_environ_tid' => '%d',
+    'work_pop_pref_tid' => '%d',
+    'cvc_degree_prog_tid' => '%d',
+    'cvintern_screened' => '%d',
+    'cvcintern_applicant' => "'%s'",
+    'sfid' => "'%s'",
+    'title' => "'%s'",
+    'applic_first_name' => "'%s'",
+    'applic_last_name' => "'%s'",
+    'email' => "'%s'",
+    'phone' => "'%s'",
+    'source' => "'%s'",
+    'intern_length' => "'%s'",
+    'intern_type' => "'%s'",
+    'degree_career_goals' => "'%s'",
+    'is_christian' => "'%s'",
+    'age_requirement' => "'%s'", 
+    'diploma_status' => "'%s'",
+    'citizen' => "'%s'",
+    'commitment_length' => "'%s'",
+    'attending_bachelors' => "'%s'", 
+    'last_active_school' => "'%s'",
+    'gender' => "'%s'", 
+    'applic_loc_street' => "'%s'",
+    'applic_loc_city' => "'%s'", 
+    'applic_loc_province' => "'%s'", 
+    'applic_loc_postal_code' => "'%s'", 
+    'applic_loc_country' => "'%s'", 
+    'testimony' => "'%s'", 
+    'geo_pref' => "'%s'", 
+    'pos_pref' => "'%s'", 
+    'special_skills' => "'%s'",
+    'interest_reason' => "'%s'", 
+    'work_environ' => "'%s'",
+    'work_pop_pref' => "'%s'", 
+    'language' => "'%s'",
+    'attends_church' => "'%s'",
+    'cvc_degree_prog' => "'%s'",
+    'major' => "'%s'",
+    'has_bachelors' => "'%s'",
+    'credits' => "'%s'",
+    'career_goals' => "'%s'",
+    'hrly_commit' => "'%s'",
+    'livable_stipend' => "'%s'",
+    'livable_stiplend_expl' => "'%s'",
+    'crim_record' => "'%s'", 
+    'crim_desc' => "'%s'",
+    'dob' => "'%s'",
+    'housing' => "'%s'",
+    'sites_req' => "'%s'", 
+    'loc_pref' => "'%s'",
+    'start_time' => "'%s'",
+    'forward_resume' => "'%s'",
+    'webcam' => "'%s'",
+    'skype' => "'%s'",
+    'pastoral_ref' => "'%s'",
+    'pastoral_ref_church' => "'%s'",
+    'pastoral_ref_phone' => "'%s'", 
+    'pastoral_ref_email' => "'%s'", 
+    'prof_ref' => "'%s'",
+    'prof_ref_org' => "'%s'", 
+    'prof_ref_phone' => "'%s'", 
+    'prof_ref_email' => "'%s'",
+    'ad_source' => "'%s'",
+    'ad_campaign' => "'%s'", 
+    'ad_keywords' => "'%s'",
+    'referer_url' => "'%s'",
+  );
   if($reverse == TRUE) {
     $object_fields = array_keys($object_fields);
   }
