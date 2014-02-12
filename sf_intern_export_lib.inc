@@ -136,15 +136,11 @@ function write_attachment_to_file($attachment) {
   if(!file_extension_is_allowed($ext)) {
     return NULL;
   }
-  // Decode the text of the file.
-  $filename = ATTACHMENT_DIRECTORY . '/' . $base_filename . '=' . $attachment->Id . '.' . $ext;
-  header('Content-Type: application/force-download');
-  header('Content-Disposition: inline; filename="' . $filename . '"');
-  echo $attachment->Body;
-  $body = base64_decode($attachment->Body);
-  //echo $body;
   // Write the file to the filesystem.
-  $result = file_put_contents($filename, $body);
+  $filename = ATTACHMENT_DIRECTORY . '/' . $base_filename . '=' . $attachment->Id . '.' . $ext;
+  //header('Content-Type: application/force-download');
+  //header('Content-Disposition: inline; filename="' . $filename . '"');
+  $result = file_put_contents($filename, $attachment->Body);
   echo 'Wrote ' . $result . ' bytes to ' . $filename;
   // @todo: Add db logging here.
   return $result;
