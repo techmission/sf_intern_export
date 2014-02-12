@@ -89,7 +89,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   // Implode & quote the array of Ids for use in SOQL statement.
   $sf_object_ids_text = implode_quoted($sf_object_ids);
   // Query for the attachments.
-  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
+  $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ") LIMIT 3"; 
   try {
     $result_attachments = $sf->client->query($soql);
   }
