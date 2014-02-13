@@ -584,6 +584,7 @@ function get_last_cron_run_date() {
   if($run_date != FALSE) {
     $last_cron_run_date = $run_date;
   }
+  print_r(gmdate(DATE_ATOM, $last_cron_run_date));
   return gmdate(DATE_ATOM, $last_cron_run_date);
 }
 
