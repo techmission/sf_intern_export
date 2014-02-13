@@ -290,7 +290,7 @@ function write_cv_objects($cv_objects) {
 	  }
     }
   }
-  /* if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
+  if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
     foreach($cv_objects[OBJECT_TYPE_ATTACHMENT] as $parent_sfid => $filename) {
       $sql = 'UPDATE tbl_applic_resume_joined SET res_file = "%s" WHERE sfid = "%s"';
 	  $result = db_query($sql, $filename, $parent_sfid);
@@ -301,7 +301,7 @@ function write_cv_objects($cv_objects) {
 	    $results['failures'][OBJECT_TYPE_ATTACHMENT]++;
 	  }
     }
-  }	*/
+  }
   return $results;
 }
 
@@ -559,13 +559,15 @@ function get_country_code($name) {
 
 // Get last cron run id.
 function get_last_cron_run_id() {
-  // Default to 1 for cron run id.
-  $last_cron_run_id = 1;
+  // Default to 0 for cron run id.
+  $last_cron_run_id = 0;
   $sql = 'SELECT MAX(cron_id) FROM tbl_sf_intern_export_cron';
-  $result = db_result(db_query($sql));
-  if($result != FALSE) {
-    $last_cron_run_id = $result++;
+  $max_cron_run_id = db_result(db_query($sql));
+  if($max_cron_run_id != FALSE) {
+    $last_cron_run_id = $max_cron_run_id;
   }
+  $last_cron_run_id++;
+  print_r($last_cron_run_id);
   return $last_cron_run_id;
 }
 
