@@ -9,7 +9,7 @@ define('OBJECT_TYPE_ATTACHMENT', 'Attachment');
 define('OBJECT_TYPE_CV', 'CVOrg');
 
 // Setting for function get_cv_object_fields().
-define('GET_CV_FIELD_FIELDS', TRUE);
+define('GET_CV_FIELD_NAMES', TRUE);
 // Setting for function get_picklist_field_info().
 define('GET_TID_FIELD_NAMES', TRUE);
 
@@ -104,6 +104,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   catch (Exception $e) {
     salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queries: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
   }
+  $attachment_filename = NULL;
   // Use queryMore to get the rest of the attachments.
   if($result_attachments->size > 0) {
 	while($queried_all == FALSE) {
@@ -146,7 +147,6 @@ function write_attachment_to_file($attachment) {
   // Write the file to the filesystem.
   $filename = ATTACHMENT_DIRECTORY . '/SFID=' .  $attachment->Id . '_Filename=' . $base_filename . '.' . $ext;
   $result = file_put_contents($filename, $attachment->Body);
-  // @todo: Add db logging here.
   if($result > 0) {
     return $filename;
   }
@@ -163,7 +163,7 @@ function normalize_record($sf_object, $object_type) {
   }
   
   // Set all the missing fields to have values, with the CV.org fieldnames.
-  $object_fields = get_cv_object_fields();
+  $object_fields = get_cv_object_fields(GET_CV_FIELD_NAMES);
   foreach($object_fields as $cv_fieldname => $sf_fieldname) {
     $sf_object->{$cv_fieldname} = !empty($sf_object->{$sf_fieldname}) ? $sf_object->{$sf_fieldname} : '';
     // Remove the duplicate fields.
@@ -215,12 +215,16 @@ function populate_record($cv_object, $object_type) {
     }
   }
   
-  //@todo: Set the correct value for cvintern_screened.
   if($object_type == OBJECT_TYPE_LEAD) {
     $cv_object->cvintern_screened = 0;
   }
   else {
-    $cv_object->cvintern_screened = 1;
+    if($cv_object->top_candidate == 'Yes') {
+      $cv_object->cvintern_screened = 2;
+	}
+	else {
+	  $cv_object->cvintern_screened = 1;
+	}
   }
   
   $cv_object->cvcintern_applicant = "City Vision Intern Applicant";
