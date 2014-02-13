@@ -244,6 +244,7 @@ function build_soql_query($soql_fields, $object_type) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
     $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND LastModifiedDate > " . $last_cron_run_date . ' LIMIT 10';
   }
+  echo "<p>" . $soql . "</p>";
   return $soql;
 }
 
