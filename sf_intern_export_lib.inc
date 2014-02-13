@@ -109,7 +109,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   if($result_attachments->size > 0) {
 	while($queried_all == FALSE) {
 	  foreach($result_attachments->records as $key => $attachment) {
-	    $attachment_filename = write_attachment_to_file($attachment);
+	    // $attachment_filename = write_attachment_to_file($attachment);
 		unset($attachment);
 		if(!empty($attachment_filename)) {
           $attachment_records[$attachment->ParentId] = $attachment_filename;
@@ -248,7 +248,8 @@ function build_soql_query($soql_fields, $object_type) {
 
 // Write the objects queried from Salesforce to the database table.
 function write_cv_objects($cv_objects) {
-  $results = array('attempts' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0),
+  $results = array('attempts' => array(OBJECT_TYPE_LEAD => count($cv_objects[OBJECT_TYPE_LEAD]), OBJECT_TYPE_CONTACT => count($cv_objects[OBJECT_TYPE_CONTACT]), 
+                                       OBJECT_TYPE_ATTACHMENT => count($cv_objects[OBJECT_TYPE_ATTACHMENT])),
                    'successes' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0),
 				   'failures' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0));
   $sql_fields = get_cv_object_fields(GET_CV_FIELD_NAMES);
@@ -284,8 +285,7 @@ function write_cv_objects($cv_objects) {
 	  }
     }
   }
-  if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
-    $results['attempts'][OBJECT_TYPE_ATTACHMENT] = count($cv_objects[OBJECT_TYPE_ATTACHMENT]);
+  /* if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
     foreach($cv_objects[OBJECT_TYPE_ATTACHMENT] as $parent_sfid => $filename) {
       $sql = 'UPDATE tbl_applic_resume_joined SET res_file = "%s" WHERE sfid = "%s"';
 	  $result = db_query($sql, $filename, $parent_sfid);
@@ -296,7 +296,7 @@ function write_cv_objects($cv_objects) {
 	    $results['failures'][OBJECT_TYPE_ATTACHMENT]++;
 	  }
     }
-  }	
+  }	*/
   return $results;
 }
 
