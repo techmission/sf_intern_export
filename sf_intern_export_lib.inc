@@ -238,13 +238,12 @@ function build_soql_query($soql_fields, $object_type) {
   $soql = '';
   if($object_type == OBJECT_TYPE_LEAD) {
     $soql = "SELECT " . $soql_fields . " FROM Lead";
-    $soql .= " WHERE Status = '3. Eligible Applicant' AND LastModifiedDate > " . $last_cron_run_date . ' LIMIT 10';
+    $soql .= " WHERE Status = '3. Eligible Applicant' AND LastModifiedDate > " . $last_cron_run_date;
   }
   else if($object_type == OBJECT_TYPE_CONTACT) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
-    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND LastModifiedDate > " . $last_cron_run_date . ' LIMIT 10';
+    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND LastModifiedDate > " . $last_cron_run_date;
   }
-  echo "<p>" . $soql . "</p>";
   return $soql;
 }
 
@@ -583,7 +582,6 @@ function get_last_cron_run_date() {
   if($run_date != FALSE) {
     $last_cron_run_date = $run_date;
   }
-  print_r(gmdate(DATE_ATOM, $last_cron_run_date));
   return gmdate(DATE_ATOM, $last_cron_run_date);
 }
 
