@@ -577,10 +577,10 @@ function get_last_cron_run_date() {
   // Default to the present minus 3 months.
   $last_cron_run_date = time() - (60 * 60 * 24 * 90);
   $sql = 'SELECT run_date FROM tbl_sf_intern_export_cron WHERE cron_id = MAX(cron_id)';
-  $result = db_result(db_query($sql));
+  $run_date = db_result(db_query($sql));
   // Set to  if the table couldn't be read or was empty.
-  if($result != FALSE) {
-    $last_cron_run_date = $result;
+  if($run_date != FALSE) {
+    $last_cron_run_date = $run_date;
   }
   return gmdate(DATE_ATOM, $last_cron_run_date);
 }
