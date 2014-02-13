@@ -283,6 +283,11 @@ function write_cv_objects($cv_objects) {
 	  else {
 	    $results['failures'][$object_type]++;
 	  }
+	  // Unset bogus date of birth.
+	  if($c->dob == '1969-12-31 19:00:00') {
+	    $sql = 'UPDATE tbl_applic_resume_joined SET dob = NULL';
+		$result = db_query($sql);
+	  }
     }
   }
   /* if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
@@ -499,6 +504,7 @@ function get_cv_object_fields($reverse = FALSE) {
   if($reverse == TRUE) {
     $object_fields = array_keys($object_fields);
   }
+  print_r($object_fields);
   return $object_fields;
 }
 
