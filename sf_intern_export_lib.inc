@@ -163,7 +163,7 @@ function normalize_record($sf_object, $object_type) {
   }
   
   // Set all the missing fields to have values, with the CV.org fieldnames.
-  $object_fields = get_cv_object_fields(GET_CV_FIELD_NAMES);
+  $object_fields = get_sf_object_fields($object_type);
   foreach($object_fields as $cv_fieldname => $sf_fieldname) {
     $sf_object->{$cv_fieldname} = !empty($sf_object->{$sf_fieldname}) ? $sf_object->{$sf_fieldname} : '';
     // Remove the duplicate fields.
@@ -504,7 +504,6 @@ function get_cv_object_fields($reverse = FALSE) {
   if($reverse == TRUE) {
     $object_fields = array_keys($object_fields);
   }
-  print_r($object_fields);
   return $object_fields;
 }
 
