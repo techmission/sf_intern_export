@@ -110,7 +110,8 @@ function query_sf_attachments($sf, $sf_object_ids) {
 	while($queried_all == FALSE) {
 	  foreach($result_attachments->records as $key => $attachment) {
 	    $attachment_filename = write_attachment_to_file($attachment);
-		unset($attachment);
+		unset($attachment->Body);
+		unset($result_attachments->records[$key]->Body);
 		if(!empty($attachment_filename)) {
           $attachment_records[$attachment->ParentId] = $attachment_filename;
 		}
