@@ -109,7 +109,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   if($result_attachments->size > 0) {
 	while($queried_all == FALSE) {
 	  foreach($result_attachments->records as $key => $attachment) {
-	    // $attachment_filename = write_attachment_to_file($attachment);
+	    $attachment_filename = write_attachment_to_file($attachment);
 		unset($attachment);
 		if(!empty($attachment_filename)) {
           $attachment_records[$attachment->ParentId] = $attachment_filename;
@@ -567,7 +567,6 @@ function get_last_cron_run_id() {
     $last_cron_run_id = $max_cron_run_id;
   }
   $last_cron_run_id++;
-  print_r($last_cron_run_id);
   return $last_cron_run_id;
 }
 
