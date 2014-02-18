@@ -303,6 +303,11 @@ function write_cv_objects($cv_objects) {
 	  }
     }
   }
+  // If the database sync was a success, then update the nid & vid fields.
+  if($cv_object[OBJECT_TYPE_LEAD]['successes'] > 0 || $cv_object[OBJECT_TYPE_CONTACT]['successes'] > 0) {
+    $sql = 'UPDATE techmi5_socgraph.tbl_applic_resume_joined SET applic_nid=applic_vid, nid=applic_vid, vid=applic_vid;';
+    $result = db_query($sql);
+  }
   return $results;
 }
 
