@@ -263,7 +263,7 @@ function write_cv_objects($cv_objects) {
     foreach($cv_objects[$object_type] as $c) {
       $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
       $sql .= " ( " . $placeholders . ")";
-      $result = db_query($sql, $c->sfid, $c->sfid, $c->sfid, $c->sfid, $c->source_tids, 
+      $result = db_query($sql, $c->sfid, $c->sfid, $c->source_tids, 
         $c->intern_length_tid, $c->intern_type_tid, $c->citizen_tid, $c->pos_pref_tid, $c->special_skills_tid,
         $c->work_environ_tid, $c->work_pop_pref_tid, $c->cvc_degree_prog_tid, $c->cvintern_screened, $c->cvcintern_applicant,
         $c->sfid, $c->title, $c->applic_first_name, $c->applic_last_name, $c->email, $c->phone,
@@ -424,8 +424,6 @@ function get_sf_object_fields($object_type) {
 // Get the fields to write to in the social graph database, and their placeholder type.
 function get_cv_object_fields($reverse = FALSE) {
   $object_fields = array(
-    'nid' => "'%s'",
-    'vid' => "'%s'",
     'applic_nid' => "'%s'",
     'applic_vid' => "'%s'",
     'source_tids' => "'%s'",
