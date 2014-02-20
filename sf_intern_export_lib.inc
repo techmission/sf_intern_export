@@ -72,7 +72,7 @@ function query_sf_objects($sf) {
 		else {
 		  $dob = '<Not returned>';
 		}
-	    echo '<p>SF Object ' $sf_object->Id . ': ' . $sf_object->FirstName . ' ' . $sf_object->LastName . ': ' . $dob . '</p>';
+	    echo '<p>SF Object ' . $sf_object->Id . ': ' . $sf_object->FirstName . ' ' . $sf_object->LastName . ': ' . $dob . '</p>';
         $cv_object = normalize_record($sf_object, $object_type);
         $cv_object = populate_record($cv_object, $object_type);
         $cv_object_records[$cv_object->Id] = $cv_object;
@@ -238,7 +238,7 @@ function populate_record($cv_object, $object_type) {
 	}
   }
   
-  echo '<p>CV Object ' $cv_object->sfid . ': ' . $cv_object->applic_first_name . ' ' . $cv_object->applic_last_name . ': ' . $cv_object->dob . '</p>';
+  echo '<p>CV Object ' . $cv_object->sfid . ': ' . $cv_object->applic_first_name . ' ' . $cv_object->applic_last_name . ': ' . $cv_object->dob . '</p>';
   
   $cv_object->cvcintern_applicant = "City Vision Intern Applicant";
   return $cv_object;
