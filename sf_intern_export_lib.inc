@@ -108,6 +108,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   // Query for the attachments.
   $soql = "SELECT Id, ParentId, Name, Body FROM Attachment WHERE ParentId IN (" . $sf_object_ids_text . ")"; 
   try {
+    // @todo: Switch to using salesforce_api_query($soql, array('queryMore' => TRUE)) for efficiency's sake (could save on the loop code)
     $result_attachments = $sf->client->query($soql);
   }
   catch (Exception $e) {
