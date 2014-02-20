@@ -72,7 +72,6 @@ function query_sf_objects($sf) {
 		else {
 		  $dob = '<Not returned>';
 		}
-	    echo '<p>SF Object ' . $sf_object->Id . ': ' . $sf_object->FirstName . ' ' . $sf_object->LastName . ': ' . $dob . '</p>';
         $cv_object = normalize_record($sf_object, $object_type);
         $cv_object = populate_record($cv_object, $object_type);
         $cv_object_records[$cv_object->Id] = $cv_object;
@@ -238,8 +237,6 @@ function populate_record($cv_object, $object_type) {
 	}
   }
   
-  echo '<p>CV Object ' . $cv_object->sfid . ': ' . $cv_object->applic_first_name . ' ' . $cv_object->applic_last_name . ': ' . $cv_object->dob . '</p>';
-  
   $cv_object->cvcintern_applicant = "City Vision Intern Applicant";
   return $cv_object;
 }
@@ -250,11 +247,11 @@ function build_soql_query($soql_fields, $object_type) {
   $soql = '';
   if($object_type == OBJECT_TYPE_LEAD) {
     $soql = "SELECT " . $soql_fields . " FROM Lead";
-    $soql .= " WHERE Status = '3. Eligible Applicant' AND LastModifiedDate > " . $last_cron_run_date;
+    $soql .= " WHERE Status = '3. Eligible Applicant' AND CreatedDate > " . $last_cron_run_date;
   }
   else if($object_type == OBJECT_TYPE_CONTACT) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
-    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND LastModifiedDate > " . $last_cron_run_date;
+    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND CreatedDate > " . $last_cron_run_date;
   }
   return $soql;
 }
