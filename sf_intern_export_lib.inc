@@ -298,8 +298,8 @@ function write_cv_objects($cv_objects) {
 	  }
 	  // Unset bogus date of birth.
 	  if($c->dob == '1969-12-31 19:00:00') {
-	    $sql = 'UPDATE tbl_applic_resume_joined SET dob = NULL';
-		$result = db_query($sql);
+	    $sql = "UPDATE tbl_applic_resume_joined SET dob = NULL WHERE sfid = '%s'";
+		$result = db_query($sql, $c->sfid);
 	  }
     }
   }
