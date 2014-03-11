@@ -63,15 +63,15 @@ function query_sf_objects($sf) {
       }
       $cv_object_records = array();
       foreach($result->records as $key => $sf_object) {
-	    if(!empty($sf_object->Birthdate__c)) {
-		  $dob = $sf_object->Birthdate__c;
-		}
-		elseif(!empty($sf_object->Birthdate)) {
-		  $dob = $sf_object->Birthdate;
-		}
-		else {
-		  $dob = '<Not returned>';
-		}
+        if(!empty($sf_object->Birthdate__c)) {
+	  $dob = $sf_object->Birthdate__c;
+	}
+	elseif(!empty($sf_object->Birthdate)) {
+	  $dob = $sf_object->Birthdate;
+	}
+        else {
+	  $dob = '<Not returned>';
+	}
         $cv_object = normalize_record($sf_object, $object_type);
         $cv_object = populate_record($cv_object, $object_type);
         $cv_object_records[$cv_object->Id] = $cv_object;
@@ -84,9 +84,9 @@ function query_sf_objects($sf) {
   // Fetch the attachments linked to the Leads & Contacts.
   if(count($sf_object_ids) > 0) {
     $attachment_records = query_sf_attachments($sf, $sf_object_ids);
-	if(count($attachment_records) > 0) {
-	  $query_results[OBJECT_TYPE_ATTACHMENT] = $attachment_records;
-	}
+    if(count($attachment_records) > 0) {
+      $query_results[OBJECT_TYPE_ATTACHMENT] = $attachment_records;
+    }
   }
   return $query_results;
 }
@@ -117,27 +117,27 @@ function query_sf_attachments($sf, $sf_object_ids) {
   $attachment_filename = NULL;
   // Use queryMore to get the rest of the attachments.
   if($result_attachments->size > 0) {
-	while($queried_all == FALSE) {
-	  foreach($result_attachments->records as $key => $attachment) {
-	    $attachment_filename = write_attachment_to_file($attachment);
-		unset($attachment->Body);
-		unset($result_attachments->records[$key]->Body);
-		if(!empty($attachment_filename)) {
+    while($queried_all == FALSE) {
+      foreach($result_attachments->records as $key => $attachment) {
+        $attachment_filename = write_attachment_to_file($attachment);
+	unset($attachment->Body);
+	unset($result_attachments->records[$key]->Body);
+	if(!empty($attachment_filename)) {
           $attachment_records[$attachment->ParentId] = $attachment_filename;
-		}
+	}
       }
-	  if($result_attachments->done != TRUE) {
-	    try {
-		  $result_attachments = $sf->client->queryMore($result_attachments->queryLocator);
-		}
-		catch (Exception $e) {
-		  salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queryMore: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
-		}
-	  }
-	  else {
-		$queried_all = TRUE;
-	  }
-	} 
+      if($result_attachments->done != TRUE) {
+        try {
+          $result_attachments = $sf->client->queryMore($result_attachments->queryLocator);
+        }
+        catch (Exception $e) {
+          salesforce_api_log(SALESFORCE_LOG_SOME, 'Exception in sf_intern_sync attachment queryMore: ' . $e->getMessage(), array(), WATCHDOG_ALERT);
+        }
+      }
+      else {
+        $queried_all = TRUE;
+      }
+    } 
   }
   return $attachment_records;
 }
@@ -147,9 +147,14 @@ function write_attachment_to_file($attachment) {
   if(!is_object($attachment) || empty($attachment->ParentId) || empty($attachment->Name) || empty($attachment->Body)) {
     return NULL;
   }
+  // Set the locale (needed for transliteration, below)
+  setlocale(LC_ALL,'en_US.utf8');
   // Get the filename parts.
   $base_filename = pathinfo($attachment->Name, PATHINFO_FILENAME);
   $base_filename = preg_replace('/\s+/', '', $base_filename);
+  // Transliterate to remove any accent characters and anything else that is not ASCII
+  // See http://stackoverflow.com/questions/3542717
+  $base_filename = iconv("UTF-8", "ASCII//TRANSLIT", $base_filename);
   $ext = pathinfo($attachment->Name, PATHINFO_EXTENSION);
   // Check if the file extension is allowed.
   if(!file_extension_is_allowed($ext)) {
@@ -215,7 +220,7 @@ function populate_record($cv_object, $object_type) {
       $field_values = array($cv_object->{$field_info['name']});
     }
     foreach($field_values as $key => $field_value) {
-	  $field_values[$key] = get_picklist_name_by_synonym($field_value);
+      $field_values[$key] = get_picklist_name_by_synonym($field_value);
       $tid_field_values[] = get_picklist_tid_by_name($field_values[$key], $field_info['vid']);
     }
     if(count($field_values) > 0) {
@@ -232,10 +237,10 @@ function populate_record($cv_object, $object_type) {
   else {
     if($cv_object->top_candidate == 'Yes') {
       $cv_object->cvintern_screened = 2;
-	}
-	else {
-	  $cv_object->cvintern_screened = 1;
-	}
+    }
+    else {
+      $cv_object->cvintern_screened = 1;
+    }
   }
   
   $cv_object->cvcintern_applicant = "City Vision Intern Applicant";
@@ -252,17 +257,17 @@ function build_soql_query($soql_fields, $object_type) {
   }
   else if($object_type == OBJECT_TYPE_CONTACT) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
-    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND CreatedDate > " . $last_cron_run_date;
+    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND (CreatedDate > " . $last_cron_run_date . " OR Ignore_Aging_of_Intern__c = TRUE)";
   }
   return $soql;
 }
 
 // Write the objects queried from Salesforce to the database table.
 function write_cv_objects($cv_objects) {
-  $results = array('attempts' => array(OBJECT_TYPE_LEAD => count($cv_objects[OBJECT_TYPE_LEAD]), OBJECT_TYPE_CONTACT => count($cv_objects[OBJECT_TYPE_CONTACT]), 
-                                       OBJECT_TYPE_ATTACHMENT => count($cv_objects[OBJECT_TYPE_ATTACHMENT])),
-                   'successes' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0),
-				   'failures' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0));
+  $results = array(
+    'attempts' => array(OBJECT_TYPE_LEAD => count($cv_objects[OBJECT_TYPE_LEAD]), OBJECT_TYPE_CONTACT => count($cv_objects[OBJECT_TYPE_CONTACT]), OBJECT_TYPE_ATTACHMENT => count($cv_objects[OBJECT_TYPE_ATTACHMENT])), 
+    'successes' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0),
+   'failures' => array(OBJECT_TYPE_LEAD => 0, OBJECT_TYPE_CONTACT => 0, OBJECT_TYPE_ATTACHMENT => 0));
   $sql_fields = get_cv_object_fields(GET_CV_FIELD_NAMES);
   $sql_fields = implode(', ', $sql_fields);
   $placeholders = get_cv_object_fields();
@@ -274,43 +279,30 @@ function write_cv_objects($cv_objects) {
       $sql = "INSERT INTO tbl_applic_resume_joined (" . $sql_fields . ") VALUES";
       $sql .= " ( " . $placeholders . ")";
       $result = db_query($sql, $c->source_tids, 
-        $c->intern_length_tid, $c->intern_type_tid, $c->citizen_tid, $c->pos_pref_tid, $c->special_skills_tid,
-        $c->work_environ_tid, $c->work_pop_pref_tid, $c->cvc_degree_prog_tid, $c->cvintern_screened, $c->cvcintern_applicant,
-        $c->sfid, $c->title, $c->applic_first_name, $c->applic_last_name, $c->email, $c->phone,
-        $c->source, $c->intern_length, $c->intern_type, $c->degree_career_goals, $c->is_christian,
-        $c->age_requirement, $c->diploma_status, $c->citizen, $c->commitment_length, $c->attending_bachelors,
-        $c->last_active_school, $c->gender, $c->applic_loc_street, $c->applic_loc_city, $c->applic_loc_province,
-        $c->applic_loc_postal_code, $c->applic_loc_country, $c->testimony, $c->geo_pref,
-        $c->pos_pref, $c->special_skills, $c->interest_reason, $c->work_environ, $c->work_pop_pref,
-        $c->language, $c->attends_church, $c->cvc_degree_prog, $c->major, $c->has_bachelors,
-        $c->credits, $c->career_goals, $c->hrly_commit, $c->livable_stipend, $c->livable_stipend_expl,
-        $c->crim_record, $c->crim_desc, $c->dob, $c->housing, $c->sites_req, $c->loc_pref,
-        $c->start_time, $c->forward_resume, $c->webcam, $c->skype, $c->pastoral_ref, $c->pastoral_ref_church, 
-        $c->pastoral_ref_phone, $c->pastoral_ref_email, $c->prof_ref, $c->prof_ref_org, $c->prof_reg_phone,
-        $c->prof_ref_email, $c->ad_source, $c->ad_campaign, $c->ad_keywords, $c->referer_url);
-	  if($result != FALSE) {
-	    $results['successes'][$object_type]++;
-	  }
-	  else {
-	    $results['failures'][$object_type]++;
-	  }
-	  // Unset bogus date of birth.
-	  if($c->dob == '1969-12-31 19:00:00') {
-	    $sql = "UPDATE tbl_applic_resume_joined SET dob = NULL WHERE sfid = '%s'";
-		$result = db_query($sql, $c->sfid);
-	  }
+        $c->intern_length_tid, $c->intern_type_tid, $c->citizen_tid, $c->pos_pref_tid, $c->special_skills_tid, $c->work_environ_tid, $c->work_pop_pref_tid, $c->cvc_degree_prog_tid, $c->cvintern_screened, $c->cvcintern_applicant, $c->sfid, $c->title, $c->applic_first_name, $c->applic_last_name, $c->email, $c->phone, $c->source, $c->intern_length, $c->intern_type, $c->degree_career_goals, $c->is_christian, $c->age_requirement, $c->diploma_status, $c->citizen, $c->commitment_length, $c->attending_bachelors, $c->last_active_school, $c->gender, $c->applic_loc_street, $c->applic_loc_city, $c->applic_loc_province, $c->applic_loc_postal_code, $c->applic_loc_country, $c->testimony, $c->geo_pref, $c->pos_pref, $c->special_skills, $c->interest_reason, $c->work_environ, $c->work_pop_pref, $c->language, $c->attends_church, $c->cvc_degree_prog, $c->major, $c->has_bachelors, $c->credits, $c->career_goals, $c->hrly_commit, $c->livable_stipend, $c->livable_stipend_expl, $c->crim_record, $c->crim_desc, $c->dob, $c->housing, $c->sites_req, $c->loc_pref, $c->start_time, $c->forward_resume, $c->webcam, $c->skype, $c->pastoral_ref, $c->pastoral_ref_church, $c->pastoral_ref_phone, $c->pastoral_ref_email, $c->prof_ref, $c->prof_ref_org, $c->prof_reg_phone, $c->prof_ref_email, $c->ad_source, $c->ad_campaign, $c->ad_keywords, $c->referer_url, $c->applic_created, $c->applic_apply_dt);
+      if($result != FALSE) {
+        $results['successes'][$object_type]++;
+      }
+      else {
+        $results['failures'][$object_type]++;
+      }
+      // Unset bogus date of birth.
+      if($c->dob == '1969-12-31 19:00:00') {
+        $sql = "UPDATE tbl_applic_resume_joined SET dob = NULL WHERE sfid = '%s'";
+	$result = db_query($sql, $c->sfid);
+      }
     }
   }
   if(isset($cv_objects[OBJECT_TYPE_ATTACHMENT]) && count($cv_objects[OBJECT_TYPE_ATTACHMENT]) > 0) {
     foreach($cv_objects[OBJECT_TYPE_ATTACHMENT] as $parent_sfid => $filename) {
       $sql = 'UPDATE tbl_applic_resume_joined SET res_file = "%s" WHERE sfid = "%s"';
-	  $result = db_query($sql, $filename, $parent_sfid);
-	  if($result != FALSE) {
-	    $results['successes'][OBJECT_TYPE_ATTACHMENT]++;
-	  }
-	  else {
-	    $results['failures'][OBJECT_TYPE_ATTACHMENT]++;
-	  }
+      $result = db_query($sql, $filename, $parent_sfid);
+      if($result != FALSE) {
+        $results['successes'][OBJECT_TYPE_ATTACHMENT]++;
+      }
+      else {
+        $results['failures'][OBJECT_TYPE_ATTACHMENT]++;
+      }
     }
   }
   // If the database sync was a success, then update the nid & vid fields.
@@ -329,10 +321,7 @@ function write_export_results($results) {
 	contact_attempts, contact_successes, contact_failures,
 	attachment_attempts, attachment_successes, attachment_failures) VALUES
 	(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)";
-  $result = db_query($sql, $last_cron_run_id, time(), CONNECTION_SUCCESS, 
-    $results['attempts'][OBJECT_TYPE_LEAD], $results['successes'][OBJECT_TYPE_LEAD], $results['failures'][OBJECT_TYPE_LEAD],
-	$results['attempts'][OBJECT_TYPE_CONTACT], $results['successes'][OBJECT_TYPE_CONTACT], $results['failures'][OBJECT_TYPE_CONTACT],
-	$results['attempts'][OBJECT_TYPE_ATTACHMENT], $results['successes'][OBJECT_TYPE_ATTACHMENT], $results['failures'][OBJECT_TYPE_ATTACHMENT]);
+  $result = db_query($sql, $last_cron_run_id, time(), CONNECTION_SUCCESS, $results['attempts'][OBJECT_TYPE_LEAD], $results['successes'][OBJECT_TYPE_LEAD], $results['failures'][OBJECT_TYPE_LEAD], $results['attempts'][OBJECT_TYPE_CONTACT], $results['successes'][OBJECT_TYPE_CONTACT], $results['failures'][OBJECT_TYPE_CONTACT], $results['attempts'][OBJECT_TYPE_ATTACHMENT], $results['successes'][OBJECT_TYPE_ATTACHMENT], $results['failures'][OBJECT_TYPE_ATTACHMENT]);
   return $result;
 }
 
@@ -414,7 +403,9 @@ function get_sf_object_fields($object_type) {
     'ad_source' => 'Ad_Source__c', 
     'ad_campaign' => 'Adwords_Campaign__c', 
     'ad_keywords' => 'Adwords_Keyword__c', 
-    'referer_url' => 'Referer_URL__c'
+    'referer_url' => 'Referer_URL__c',
+    'applic_created' => 'CreatedDate',
+    'applic_apply_dt' => 'CreatedDate',
   );
   if($object_type == OBJECT_TYPE_CONTACT) {
     $object_fields['top_candidate'] = 'Top_Candidate__c';
@@ -432,6 +423,8 @@ function get_sf_object_fields($object_type) {
     $object_fields['dob'] = 'Birthdate';
     $object_fields['loc_pref'] = 'CVC_S2_Location_Notes__c';
     $object_fields['start_time'] = 'Preferred_Start_Date_CVC__c';
+    $object_fields['applic_created'] = 'Lead_Created_Date__c';
+    $object_field['applic_apply_dt'] = 'Lead_Created_Date__c';
   }
   return $object_fields;
 }
@@ -512,6 +505,8 @@ function get_cv_object_fields($reverse = FALSE) {
     'ad_campaign' => "'%s'", 
     'ad_keywords' => "'%s'",
     'referer_url' => "'%s'",
+    'applic_created' => "'%s'",
+    'applic_apply_dt' => "'%s'",
   );
   if($reverse == TRUE) {
     $object_fields = array_keys($object_fields);
@@ -587,7 +582,7 @@ function get_last_cron_run_id() {
 // or a date 3 months in the past if the table is empty.
 function get_last_cron_run_date() {
   // Default to the present minus 3 months.
-  $last_cron_run_date = time() - (60 * 60 * 24 * 90);
+  $last_cron_run_date = time() - (60 * 60 * 24 * 180);
   $sql = 'SELECT MAX(run_date) FROM tbl_sf_intern_export_cron';
   $run_date = db_result(db_query($sql));
   if($run_date != FALSE) {
@@ -615,3 +610,4 @@ function implode_quoted($arr) {
   $imploded_str = implode(", ", $arr);
   return $imploded_str;
 }
+
