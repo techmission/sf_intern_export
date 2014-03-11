@@ -101,7 +101,7 @@ function query_sf_attachments($sf, $sf_object_ids) {
   }  
   // If no ParentIds, return the empty array.
   if(!is_array($sf_object_ids) || count($sf_object_ids) < 1) {
-	return $attachment_records;
+    return $attachment_records;
   }
   // Implode & quote the array of Ids for use in SOQL statement.
   $sf_object_ids_text = implode_quoted($sf_object_ids);
@@ -205,6 +205,9 @@ function populate_record($cv_object, $object_type) {
   $dob = strtotime($cv_object->dob);
   $cv_object->dob = date('Y-m-d H:i:s', $dob);
   
+  // Convert the applic_created field to unixtime
+  $cv_object->applic_created = strtotime($cv_object->applic_created);
+
   // Normalize the applic_loc_country field
   $cv_object->applic_loc_country = get_country_code($cv_object->applic_loc_country);
   
