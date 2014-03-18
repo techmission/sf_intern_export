@@ -260,7 +260,11 @@ function build_soql_query($soql_fields, $object_type) {
   }
   else if($object_type == OBJECT_TYPE_CONTACT) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
-    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND (CreatedDate > " . $last_cron_run_date . " OR Ignore_Aging_of_Intern__c = TRUE)";
+    // Alternative query: use if resyncing from the beginning.
+    // Otherwise, you could generate duplicates.
+    // $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND (CreatedDate > " . $last_cron_run_date . " OR Ignore_Aging_of_Intern__c = TRUE)";
+    // Query for pulling in just the new records.
+    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND CreatedDate > " . $last_cron_run_date;
   }
   return $soql;
 }
