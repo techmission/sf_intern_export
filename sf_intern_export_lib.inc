@@ -234,6 +234,18 @@ function populate_record($cv_object, $object_type) {
     }
   }
   
+  // Correct the geographic preferences.
+  if($cv_object->geo_pref == 'Willing to serve in either a major city or a small town anywhere') {
+    $cv_object->geo_pref = 'Willing to relocate anywhere';
+  }
+  else if($cv_object->geo_pref == 'Strongly prefer to be in any major city') {
+    $cv_object->geo_pref = 'Willing to relocate to a major city';
+  }
+  else if($cv_object->geo_pref == 'Strongly prefer to stay in my current location' || $cv_object->geo_pref == 'I cannot move from my current location') {
+    $cv_object->geo_pref = 'Cannot Relocate';
+  }
+  
+  // Flag Top Candidates.
   if($object_type == OBJECT_TYPE_LEAD) {
     $cv_object->cvintern_screened = 0;
   }
@@ -246,6 +258,7 @@ function populate_record($cv_object, $object_type) {
     }
   }
   
+  // This always has to be set...for some reason. (Go ask Ali; I think she knows.)
   $cv_object->cvcintern_applicant = "City Vision Intern Applicant";
   return $cv_object;
 }
