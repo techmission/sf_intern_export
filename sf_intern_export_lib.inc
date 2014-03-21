@@ -275,9 +275,9 @@ function build_soql_query($soql_fields, $object_type) {
     $soql = "SELECT " . $soql_fields . " FROM Contact";
     // Alternative query: use if resyncing from the beginning.
     // Otherwise, you could generate duplicates.
-    // $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND (CreatedDate > " . $last_cron_run_date . " OR Ignore_Aging_of_Intern__c = TRUE)";
+    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND (CreatedDate > " . $last_cron_run_date . " OR Ignore_Aging_of_Intern__c = TRUE)";
     // Query for pulling in just the new records.
-    $soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND CreatedDate > " . $last_cron_run_date;
+    //$soql .= " WHERE CVC_Intern_Status__c = '4. Screened Applicant' AND CreatedDate > " . $last_cron_run_date;
   }
   return $soql;
 }
