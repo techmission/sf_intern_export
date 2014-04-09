@@ -155,6 +155,9 @@ function write_attachment_to_file($attachment) {
   // Transliterate to remove any accent characters and anything else that is not ASCII
   // See http://stackoverflow.com/questions/3542717
   $base_filename = iconv("UTF-8", "ASCII//TRANSLIT", $base_filename);
+  // Remove parentheses.
+  $base_filename = str_replace('(', '', $base_filename);
+  $base_filename = str_replace(')', '', $base_filename);
   $ext = pathinfo($attachment->Name, PATHINFO_EXTENSION);
   // Check if the file extension is allowed.
   if(!file_extension_is_allowed($ext)) {
